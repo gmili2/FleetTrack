@@ -1,0 +1,83 @@
+# FleetTrack — environnement complet : http://localhost:8080
+#   docker compose up -d --build
+name: fleettrack
+
+x-backend: &backend
+  build: { context: ., dockerfile: docker/php/Dockerfile }
+  image: fleettrack-php
+  volumes: [ "./backend:/var/www/backend" ]
+  environment: &backend-env
+    APP_URL: http://localhost:8080
+    FRONTEND_URL: http://localhost:8080
+    SANCTUM_STATEFUL_DOMAINS: localhost:8080,127.0.0.1:8080
+    SESSION_DOMAIN: "null"
+    DB_CONNECTION: mariadb
+    DB_HOST: mariadb
+    DB_PORT: 3306
+    DB_DATABASE: fleettrack
+    DB_USERNAME: fleettrack
+    DB_PASSWORD: fleettrack
+    QUEUE_CONNECTION: database
+    BROADCAST_CONNECTION: reverb
+    # Laravel publie les événements vers Reverb sur le réseau Docker.
+    REVERB_HOST: reverb
+    REVERB_PORT: 8080
+    REVERB_SCHEME: http
+  depends_on:
+    mariadb: { condition: service_healthy }
+  restart: unless-stopped
+
+services:
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: fleettrack
+      MARIADB_USER: fleettrack
+      MARIADB_PASSWORD: fleettrack
+      MARIADB_ROOT_PASSWORD: root
+      TZ: UTC
+    command: [ "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--default-storage-engine=InnoDB" ]
+    volumes: [ "mariadb-data:/var/lib/mysql" ]
+    ports: [ "3307:3306" ]
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  app:
+    <<: *backend
+    environment:
+      <<: *backend-env
+      RUN_MIGRATIONS: "1"
+
+  reverb:
+    <<: *backend
+    command: [ "php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080" ]
+    depends_on: [ app ]
+
+  queue:
+    <<: *backend
+    command: [ "php", "artisan", "queue:work", "--tries=3", "--sleep=1" ]
+    depends_on: [ app ]
+
+  scheduler:
+    <<: *backend
+    command: [ "php", "artisan", "schedule:work" ]
+    depends_on: [ app ]
+
+  # Simulateur GPS (étape 3) :
+  # simulator:
+  #   <<: *backend
+  #   command: [ "php", "artisan", "fleet:simulate" ]
+  #   depends_on: [ app, reverb ]
+
+  nginx:
+    build: { context: ., dockerfile: docker/nginx/Dockerfile }
+    ports: [ "8080:80" ]
+    depends_on: [ app, reverb ]
+    restart: unless-stopped
+
+volumes:
+  mariadb-data:
