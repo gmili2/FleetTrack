@@ -38,6 +38,15 @@ Après 5 échecs de connexion d'affilée, le compte est verrouillé pendant 15 m
 
 Au départ, tous les camions sont garés au dépôt. CAM-24 est en maintenance et hors ligne.
 
+## Lancement rapide (sans Docker)
+
+```bash
+./demo.sh            # lance MariaDB, l'API, Reverb, la queue, le scheduler (et le simulateur) puis le front
+./demo.sh --reset    # idem, en remettant les données de démo à zéro
+```
+
+L'application s'ouvre sur http://localhost:5173. `Ctrl+C` arrête tout. Les journaux sont dans `.logs/`.
+
 ## Lancement avec Docker
 
 ```bash
