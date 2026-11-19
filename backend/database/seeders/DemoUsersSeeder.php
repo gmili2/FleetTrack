@@ -12,7 +12,7 @@ class DemoUsersSeeder extends Seeder
     public function run(): void
     {
         $users = [
-            ['superadmin@demo.ma', 'Youssef El Amrani', Roles::SUPER_ADMIN, '0661 20 30 40'],
+            ['superadmin@demo.ma', 'Amine Berrada', Roles::SUPER_ADMIN, '0661 20 30 40'],
             ['admin@demo.ma', 'Nadia Chraibi', Roles::ADMIN, '0662 11 22 33'],
             ['flotte@demo.ma', 'Salma Bennani', Roles::FLEET_MANAGER, '0663 44 55 66'],
             ['operateur@demo.ma', 'Karim Tazi', Roles::OPERATOR, '0664 77 88 99'],

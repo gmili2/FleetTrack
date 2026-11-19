@@ -26,6 +26,18 @@ Le mot de passe de tous les comptes est `password`.
 
 Après 5 échecs de connexion d'affilée, le compte est verrouillé pendant 15 minutes.
 
+## Données de démo
+
+`php artisan migrate:fresh --seed` crée :
+
+- 12 camions (de CAM-01 à CAM-24), chacun avec son boîtier GPS ;
+- 14 chauffeurs, avec un matricule (CH-1012…) et un badge (B-4410…) ;
+- 4 clients ;
+- 8 zones : le dépôt Aïn Sebaâ, l'usine de Mohammedia, 4 clients, le chantier de Lissasfa et la zone de livraison du port ;
+- 33 missions, réparties sur les 4 statuts (en attente, en cours, terminée, annulée), chacune avec son journal d'événements.
+
+Au départ, tous les camions sont garés au dépôt. CAM-24 est en maintenance et hors ligne.
+
 ## Lancement avec Docker
 
 ```bash
@@ -110,7 +122,7 @@ cd backend && ./vendor/bin/pest
 ## Avancement
 
 - [x] Étape 1 : structure, Docker, authentification (verrouillage après 5 échecs, « Se souvenir de moi »), rôles et permissions, layout Vue
-- [ ] Étape 2 : migrations, modèles, seeders
+- [x] Étape 2 : migrations, modèles, seeders
 - [ ] Étape 3 : simulateur, temps réel, suivi GPS en direct
 - [ ] Étape 4 : tableau de bord, camions, chauffeurs
 - [ ] Étape 5 : historique et GPS Replay

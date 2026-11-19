@@ -11,7 +11,12 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class,
             DemoUsersSeeder::class,
-            // Étape 2 : camions, chauffeurs, boîtiers, zones, missions…
+            SettingSeeder::class,
+            CustomerSeeder::class,
+            GeofenceSeeder::class,
+            DriverSeeder::class,
+            VehicleSeeder::class,
+            MissionSeeder::class,
         ]);
     }
 }
