@@ -164,6 +164,25 @@ La détection des zones applique un anti-rebond : une visite n'est comptée que 
 
 `php artisan fleet:check-status` est planifié chaque minute. Il passe hors ligne les camions silencieux et signale les sorties non pointées.
 
+## Zones, visites et pointages
+
+- **Zones** :
+  - une liste filtrable par type, avec le nombre de visites du jour ;
+  - une carte où l'on **dessine** un cercle (clic sur le centre, puis clic au bord) ou un polygone (un clic par sommet), avec Leaflet-Geoman ;
+  - une zone sélectionnée peut être ajustée à la souris (centre, rayon, sommets) ;
+  - un formulaire : nom, type, client, rayon, durée minimale (anti-rebond), couleur, détection active ou non ;
+  - le simulateur prend en compte les modifications dans la minute.
+- **Visites d'une zone** :
+  - période (aujourd'hui, 7 jours, 30 jours ou personnalisée) et filtre par camion ;
+  - indicateurs : visites, durée moyenne et médiane, temps total, camions distincts ;
+  - graphique du temps passé par camion, et carte des camions présents en direct ;
+  - historique paginé avec la mission associée ;
+  - export **PDF** (dompdf) et **Excel**, et mise à jour en direct.
+- **Pointages** :
+  - les services du jour, avec les services restés ouverts depuis la veille ;
+  - onglets Tous, En service, Terminés et Anomalies (lignes marquées en rouge) ;
+  - recherche, export Excel, et flux des passages de badge en direct.
+
 ## Historique et GPS Replay
 
 Sur l'écran **Historique**, on choisit un camion, une date et une plage horaire. On peut aussi y arriver depuis le bouton « Rejouer » d'un trajet (fiche camion) ou d'un service (historique d'un chauffeur).
@@ -206,6 +225,6 @@ cd backend && ./vendor/bin/pest
 - [x] Étape 3 : simulateur, temps réel, suivi GPS en direct
 - [x] Étape 4 : tableau de bord, camions, chauffeurs (+ espace chauffeur et historique 30 jours)
 - [x] Étape 5 : historique et GPS Replay
-- [ ] Étape 6 : zones, visites, pointages
+- [x] Étape 6 : zones, visites, pointages
 - [ ] Étape 7 : missions, rapports, exports, paramètres
 - [ ] Étape 8 : tests, README, vérification finale

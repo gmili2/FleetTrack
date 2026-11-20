@@ -17,9 +17,9 @@ const SCREENS: Record<string, { subtitle: string; step?: number }> = {
   history: { subtitle: 'Trajets et GPS Replay' },
   vehicles: { subtitle: 'Parc de camions et boîtiers GPS' },
   drivers: { subtitle: 'Matricules, badges, permis et historique' },
-  shifts: { subtitle: 'Prises et fins de service par badge', step: 6 },
+  shifts: { subtitle: 'Prises et fins de service par badge' },
   missions: { subtitle: 'Planification et suivi des missions', step: 7 },
-  geofences: { subtitle: 'Dépôts, clients, chantiers et zones de livraison', step: 6 },
+  geofences: { subtitle: 'Dépôts, clients, chantiers et zones de livraison' },
   reports: { subtitle: 'Kilométrage, conduite, visites et activité', step: 7 },
   settings: { subtitle: 'Seuils, utilisateurs et simulateur', step: 7 },
 }
@@ -31,6 +31,8 @@ const VIEWS: Record<string, { component: RouteRecordRaw['component']; fullBleed?
   dashboard: { component: () => import('@/views/DashboardView.vue') },
   vehicles: { component: () => import('@/views/VehiclesView.vue') },
   history: { component: () => import('@/views/HistoryView.vue') },
+  geofences: { component: () => import('@/views/ZonesView.vue'), fullBleed: true },
+  shifts: { component: () => import('@/views/ShiftsView.vue') },
   drivers: { component: () => import('@/views/DriversView.vue') },
 }
 
@@ -52,6 +54,7 @@ const routes: RouteRecordRaw[] = [
         return NAV.find((i) => auth.canSee(i))?.to ?? '/acces-refuse'
       } },
       ...appRoutes,
+      { path: 'zones/:id/visites', name: 'zone-visits', component: () => import('@/views/ZoneVisitsView.vue'), meta: { title: 'Visites de la zone', subtitle: 'Visites et durées dans une zone', permission: 'geofences.view' } },
       { path: 'chauffeurs/:id', name: 'driver-history', component: () => import('@/views/DriverHistoryView.vue'), meta: { title: 'Historique du chauffeur', subtitle: 'Services, pointages et trajets', permission: 'drivers.view' } },
       { path: 'camions/:id', name: 'vehicle-detail', component: () => import('@/views/VehicleDetailView.vue'), meta: { title: 'Fiche camion', subtitle: 'Position, indicateurs 30 jours, trajets et affectations', permission: 'vehicles.view' } },
       { path: 'acces-refuse', name: 'forbidden', component: () => import('@/views/ForbiddenView.vue'), meta: { title: 'Accès refusé' } },

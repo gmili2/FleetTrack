@@ -65,3 +65,10 @@ export type DriverRow = {
   on_shift: { id: number; start_at: string; source: 'badge' | 'app'; vehicle_id: number } | null
   shifts_this_month: number
 }
+
+export type ZoneRow = {
+  id: number; name: string; type: string; type_label: string; shape: 'circle' | 'polygon'; shape_label: string
+  center: [number, number]; center_lat: number; center_lng: number; radius_m: number | null; coordinates: [number, number][] | null
+  color: string; customer: { id: number; code: string; name: string } | null; min_visit_seconds: number; address: string | null
+  is_active: boolean; visits_today?: number; vehicles_inside?: number
+}

@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\GeofenceController;
+use App\Http\Controllers\Api\ShiftController;
+use App\Http\Controllers\Api\ZoneVisitController;
 use App\Http\Controllers\Api\HistoryController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\DriverController;
@@ -65,6 +68,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('drivers', DriverController::class);
     Route::get('/drivers/{driver}/shifts', [DriverController::class, 'shifts'])->middleware('can:drivers.view');
     Route::get('/shifts/{shift}/track', [DriverController::class, 'track'])->middleware('can:shifts.view');
+
+    // Pointages
+    Route::get('/shifts', [ShiftController::class, 'index']);
+    Route::get('/shifts/export', [ShiftController::class, 'export']);
+    Route::get('/badge-events', [ShiftController::class, 'badges']);
+
+    // Zones (GeofencePolicy) et visites
+    Route::get('/customers', [GeofenceController::class, 'customers']);
+    Route::apiResource('geofences', GeofenceController::class);
+    Route::get('/geofences/{geofence}/visits', [ZoneVisitController::class, 'index']);
+    Route::get('/geofences/{geofence}/visits/export', [ZoneVisitController::class, 'export']);
 
     // Les autres modules métier (camions, chauffeurs, missions…) arrivent aux étapes suivantes,
     // chacun protégé par ses Policies et les permissions « module.action ».

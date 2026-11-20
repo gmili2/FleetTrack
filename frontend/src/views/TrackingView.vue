@@ -304,10 +304,3 @@ const simulatorDown = computed(() => {
     </aside>
   </div>
 </template>
-
-<style>
-.ft-vehicle { background: none; border: 0; }
-.ft-zone-label { background: rgba(255,255,255,.9); border: 0; box-shadow: 0 1px 3px rgba(15,23,42,.15); color: #334155; font: 600 11px Inter, system-ui, sans-serif; padding: 1px 6px; }
-.ft-zone-label::before { display: none; }
-.leaflet-container { font-family: Inter, system-ui, sans-serif; }
-</style>
