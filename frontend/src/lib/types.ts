@@ -45,3 +45,23 @@ export type ShiftTrack = {
   summary: { distance_km: number; driving_seconds: number; stopped_seconds: number; stops_count: number; max_speed_kmh: number; avg_speed_kmh: number; stops: { started_at: string; ended_at: string | null; duration_seconds: number; latitude: number; longitude: number }[] }
   points: [number, number, number, string][]
 }
+
+export type Paginated<T> = { data: T[]; meta: { current_page: number; last_page: number; per_page: number; total: number; counts?: Record<string, number> } }
+
+export type VehicleRow = {
+  id: number; name: string; plate_number: string; brand: string | null; model: string | null
+  type: string; type_label: string; year: number | null; status: string; status_label: string; status_tone: 'green' | 'orange' | 'gray'
+  speed_limit_kmh: number; odometer_km: number; notes: string | null
+  driver: { id: number; name: string; employee_number: string } | null
+  device: { id: number; imei: string; model: string | null; sim_number: string | null; installed_at: string | null; last_seen_at: string | null } | null
+  live: { status: LiveStatus; status_label: string; latitude: number | null; longitude: number | null; speed_kmh: number; address: string | null; today_distance_km: number; last_position_at: string | null } | null
+}
+
+export type DriverRow = {
+  id: number; name: string; first_name: string; last_name: string; initials: string; employee_number: string; badge_number: string; phone: string | null
+  license_number: string | null; license_category: string | null; license_expires_at: string | null; license_expired: boolean; license_expires_soon: boolean
+  status: string; status_label: string; status_tone: 'green' | 'blue' | 'gray'; hired_at: string | null; notes: string | null
+  vehicle: { id: number; name: string; plate_number: string } | null
+  on_shift: { id: number; start_at: string; source: 'badge' | 'app'; vehicle_id: number } | null
+  shifts_this_month: number
+}

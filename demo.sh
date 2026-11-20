@@ -24,6 +24,8 @@ cd "$ROOT/backend"
 if [ "$1" = "--reset" ]; then
   echo "▶ Réinitialisation des données de démo…"
   php artisan migrate:fresh --seed --force
+  echo "▶ Génération de 30 jours d'historique…"
+  php artisan fleet:seed-history --days=30
 else
   php artisan migrate --force >/dev/null
 fi

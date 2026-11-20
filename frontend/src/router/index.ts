@@ -12,10 +12,10 @@ const ComingSoon = () => import('@/views/ComingSoonView.vue')
 /** Écrans du menu : titre, sous-titre et étape de livraison. */
 const SCREENS: Record<string, { subtitle: string; step?: number }> = {
   'driver-portal': { subtitle: 'Pointage et suivi de mon service' },
-  dashboard: { subtitle: 'Vue d’ensemble de la flotte', step: 4 },
+  dashboard: { subtitle: 'Vue d’ensemble de la flotte' },
   tracking: { subtitle: 'Position des camions en direct', step: 3 },
   history: { subtitle: 'Trajets et GPS Replay', step: 5 },
-  vehicles: { subtitle: 'Parc de camions et boîtiers GPS', step: 4 },
+  vehicles: { subtitle: 'Parc de camions et boîtiers GPS' },
   drivers: { subtitle: 'Matricules, badges, permis et historique' },
   shifts: { subtitle: 'Prises et fins de service par badge', step: 6 },
   missions: { subtitle: 'Planification et suivi des missions', step: 7 },
@@ -28,6 +28,8 @@ const SCREENS: Record<string, { subtitle: string; step?: number }> = {
 const VIEWS: Record<string, { component: RouteRecordRaw['component']; fullBleed?: boolean }> = {
   tracking: { component: () => import('@/views/TrackingView.vue'), fullBleed: true },
   'driver-portal': { component: () => import('@/views/DriverPortalView.vue') },
+  dashboard: { component: () => import('@/views/DashboardView.vue') },
+  vehicles: { component: () => import('@/views/VehiclesView.vue') },
   drivers: { component: () => import('@/views/DriversView.vue') },
 }
 
@@ -50,7 +52,7 @@ const routes: RouteRecordRaw[] = [
       } },
       ...appRoutes,
       { path: 'chauffeurs/:id', name: 'driver-history', component: () => import('@/views/DriverHistoryView.vue'), meta: { title: 'Historique du chauffeur', subtitle: 'Services, pointages et trajets', permission: 'drivers.view' } },
-      { path: 'camions/:id', name: 'vehicle-detail', component: ComingSoon, meta: { title: 'Fiche camion', subtitle: 'Détail d’un camion', permission: 'vehicles.view', step: 4 } },
+      { path: 'camions/:id', name: 'vehicle-detail', component: () => import('@/views/VehicleDetailView.vue'), meta: { title: 'Fiche camion', subtitle: 'Position, indicateurs 30 jours, trajets et affectations', permission: 'vehicles.view' } },
       { path: 'acces-refuse', name: 'forbidden', component: () => import('@/views/ForbiddenView.vue'), meta: { title: 'Accès refusé' } },
       { path: ':pathMatch(.*)*', name: 'not-found', component: () => import('@/views/NotFoundView.vue'), meta: { title: 'Page introuvable' } },
     ],

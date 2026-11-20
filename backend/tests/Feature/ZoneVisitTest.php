@@ -55,3 +55,11 @@ it('ne ferme pas la visite sur un petit écart GPS au bord du cercle', function 
 
     expect(VehicleZoneVisit::where('geofence_id', $this->zone->id)->whereNull('exited_at')->count())->toBe(1);
 });
+
+it('génère un historique cohérent et ses statistiques journalières', function () {
+    $this->artisan('fleet:seed-history', ['--days' => 3])->assertSuccessful();
+    expect(\App\Models\DailyVehicleStat::count())->toBeGreaterThan(0)
+        ->and(\App\Models\DriverShift::whereNotNull('end_at')->count())->toBeGreaterThan(0)
+        ->and(VehicleZoneVisit::whereNotNull('exited_at')->where('duration_seconds', '>', 0)->count())->toBeGreaterThan(0)
+        ->and(\App\Models\DailyVehicleStat::max('distance_km'))->toBeGreaterThan(20);
+});

@@ -164,6 +164,24 @@ La détection des zones applique un anti-rebond : une visite n'est comptée que 
 
 `php artisan fleet:check-status` est planifié chaque minute. Il passe hors ligne les camions silencieux et signale les sorties non pointées.
 
+## Historique de démonstration
+
+```bash
+php artisan fleet:seed-history --days=30   # environ 15 s, relançable sans créer de doublons
+php artisan fleet:daily-stats --date=2026-11-19
+```
+
+La commande génère, pour chaque camion actif et chaque jour ouvré :
+- les trajets réels, avec une position toutes les 30 s en roulant et toutes les 3 min à l'arrêt ;
+- les visites de zones et leurs événements ;
+- les pointages, avec de rares anomalies ;
+- les excès de vitesse ;
+- environ 20 % de missions terminées.
+
+Les missions déjà planifiées sont rejouées à leur heure. Les références `MIS-AAAA-00001…` sont ensuite renumérotées dans l'ordre chronologique.
+
+Le job `ComputeDailyStats` remplit `daily_vehicle_stats` (km, conduite, arrêts, vitesses). Il est planifié chaque nuit à 00:15 (heure de Casablanca). `./demo.sh --reset` lance automatiquement la génération de l'historique.
+
 ## Tests
 
 ```bash
@@ -175,7 +193,7 @@ cd backend && ./vendor/bin/pest
 - [x] Étape 1 : structure, Docker, authentification (verrouillage après 5 échecs, « Se souvenir de moi »), rôles et permissions, layout Vue
 - [x] Étape 2 : migrations, modèles, seeders
 - [x] Étape 3 : simulateur, temps réel, suivi GPS en direct
-- [ ] Étape 4 : tableau de bord, camions, chauffeurs
+- [x] Étape 4 : tableau de bord, camions, chauffeurs (+ espace chauffeur et historique 30 jours)
 - [ ] Étape 5 : historique et GPS Replay
 - [ ] Étape 6 : zones, visites, pointages
 - [ ] Étape 7 : missions, rapports, exports, paramètres

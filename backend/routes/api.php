@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\DriverPortalController;
 use App\Http\Controllers\Api\LiveController;
@@ -40,8 +42,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/shifts/{shift}/track', [DriverPortalController::class, 'track']);
     });
 
-    // Chauffeurs et historique de leurs services
-    Route::get('/drivers', [DriverController::class, 'index'])->middleware('can:drivers.view');
+    Route::get('/dashboard', DashboardController::class)->middleware('can:dashboard.view');
+
+    // Camions (droits vérifiés par VehiclePolicy)
+    Route::get('/vehicles/export', [VehicleController::class, 'export']);
+    Route::apiResource('vehicles', VehicleController::class);
+    Route::prefix('vehicles/{vehicle}')->group(function () {
+        Route::get('/overview', [VehicleController::class, 'overview']);
+        Route::get('/trips', [VehicleController::class, 'trips']);
+        Route::get('/visits', [VehicleController::class, 'visits']);
+        Route::get('/missions', [VehicleController::class, 'missions']);
+        Route::get('/assignments', [VehicleController::class, 'assignments']);
+    });
+
+    // Chauffeurs (DriverPolicy) et historique de leurs services
+    Route::get('/drivers/export', [DriverController::class, 'export']);
+    Route::apiResource('drivers', DriverController::class);
     Route::get('/drivers/{driver}/shifts', [DriverController::class, 'shifts'])->middleware('can:drivers.view');
     Route::get('/shifts/{shift}/track', [DriverController::class, 'track'])->middleware('can:shifts.view');
 
