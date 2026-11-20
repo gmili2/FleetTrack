@@ -164,6 +164,17 @@ La détection des zones applique un anti-rebond : une visite n'est comptée que 
 
 `php artisan fleet:check-status` est planifié chaque minute. Il passe hors ligne les camions silencieux et signale les sorties non pointées.
 
+## Historique et GPS Replay
+
+Sur l'écran **Historique**, on choisit un camion, une date et une plage horaire. On peut aussi y arriver depuis le bouton « Rejouer » d'un trajet (fiche camion) ou d'un service (historique d'un chauffeur).
+
+- **Tracé** : départ A, arrivée B et arrêts numérotés, c'est-à-dire tout arrêt d'au moins 5 min, d'après le seuil défini dans les paramètres.
+- **Synthèse** : distance, temps de conduite et d'arrêt, vitesses moyenne et maximale.
+- **Chronologie cliquable** : elle alterne trajets et arrêts, et indique pour chaque arrêt s'il a eu lieu dans une zone ou hors zone. Elle s'exporte en Excel.
+- **Lecteur animé** : lecture et pause (barre d'espace), vitesses x1 à x20 (x1 = 30 s de trajet par seconde), curseur de temps, et une option pour suivre le camion. La partie déjà parcourue est tracée en bleu foncé.
+
+Le stationnement de nuit n'est pas compté comme un arrêt : le trajet est cadré du premier au dernier mouvement. Une période ne peut pas dépasser 3 jours.
+
 ## Historique de démonstration
 
 ```bash
@@ -194,7 +205,7 @@ cd backend && ./vendor/bin/pest
 - [x] Étape 2 : migrations, modèles, seeders
 - [x] Étape 3 : simulateur, temps réel, suivi GPS en direct
 - [x] Étape 4 : tableau de bord, camions, chauffeurs (+ espace chauffeur et historique 30 jours)
-- [ ] Étape 5 : historique et GPS Replay
+- [x] Étape 5 : historique et GPS Replay
 - [ ] Étape 6 : zones, visites, pointages
 - [ ] Étape 7 : missions, rapports, exports, paramètres
 - [ ] Étape 8 : tests, README, vérification finale

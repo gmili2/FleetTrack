@@ -131,7 +131,10 @@ const openShift = computed(() => res.value?.data.find((s) => s.open) ?? null)
     <section class="card flex min-h-[480px] flex-col overflow-hidden">
       <div class="border-b border-line px-5 py-3">
         <h2 class="m-0 text-base font-bold">Trajet du service</h2>
-        <div v-if="selected" class="text-[13px] text-muted">{{ fDate(selected.start_at) }} · {{ selected.vehicle?.name }} · {{ fTime(selected.start_at) }} → {{ selected.end_at ? fTime(selected.end_at) : 'en cours' }}</div>
+        <div v-if="selected" class="flex flex-wrap items-center justify-between gap-2 text-[13px] text-muted">
+          <span>{{ fDate(selected.start_at) }} · {{ selected.vehicle?.name }} · {{ fTime(selected.start_at) }} → {{ selected.end_at ? fTime(selected.end_at) : 'en cours' }}</span>
+          <RouterLink v-if="selected.vehicle" :to="{ path: '/historique', query: { vehicle: String(selected.vehicle.id), from: selected.start_at, to: selected.end_at ?? new Date().toISOString() } }" class="font-semibold">Rejouer le service →</RouterLink>
+        </div>
       </div>
       <div v-if="track" class="grid grid-cols-2 gap-px bg-line text-center sm:grid-cols-4">
         <div class="bg-white p-2.5"><div class="text-xs text-muted">Distance</div><b class="num">{{ fKm(track.summary.distance_km) }}</b></div>

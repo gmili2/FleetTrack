@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\HistoryController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\DriverPortalController;
@@ -43,6 +44,10 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::get('/dashboard', DashboardController::class)->middleware('can:dashboard.view');
+
+    // Historique et GPS Replay (HistoryRequest vérifie history.view)
+    Route::get('/history', [HistoryController::class, 'show']);
+    Route::get('/history/export', [HistoryController::class, 'export']);
 
     // Camions (droits vérifiés par VehiclePolicy)
     Route::get('/vehicles/export', [VehicleController::class, 'export']);

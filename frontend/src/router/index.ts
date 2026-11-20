@@ -14,7 +14,7 @@ const SCREENS: Record<string, { subtitle: string; step?: number }> = {
   'driver-portal': { subtitle: 'Pointage et suivi de mon service' },
   dashboard: { subtitle: 'Vue d’ensemble de la flotte' },
   tracking: { subtitle: 'Position des camions en direct', step: 3 },
-  history: { subtitle: 'Trajets et GPS Replay', step: 5 },
+  history: { subtitle: 'Trajets et GPS Replay' },
   vehicles: { subtitle: 'Parc de camions et boîtiers GPS' },
   drivers: { subtitle: 'Matricules, badges, permis et historique' },
   shifts: { subtitle: 'Prises et fins de service par badge', step: 6 },
@@ -30,6 +30,7 @@ const VIEWS: Record<string, { component: RouteRecordRaw['component']; fullBleed?
   'driver-portal': { component: () => import('@/views/DriverPortalView.vue') },
   dashboard: { component: () => import('@/views/DashboardView.vue') },
   vehicles: { component: () => import('@/views/VehiclesView.vue') },
+  history: { component: () => import('@/views/HistoryView.vue') },
   drivers: { component: () => import('@/views/DriversView.vue') },
 }
 
