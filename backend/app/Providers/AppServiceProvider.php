@@ -11,7 +11,11 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        // Services de suivi partagés (l'anti-rebond des zones garde un état en mémoire).
+        $this->app->singleton(\App\Services\Tracking\Alerts::class);
+        $this->app->singleton(\App\Services\Tracking\GeofenceDetector::class);
+        $this->app->singleton(\App\Services\Tracking\PositionIngestor::class);
+        $this->app->singleton(\App\Services\Tracking\ShiftService::class);
     }
 
     public function boot(): void

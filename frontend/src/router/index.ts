@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import AppLayout from '@/layouts/AppLayout.vue'
 
 declare module 'vue-router' {
-  interface RouteMeta { title?: string; subtitle?: string; permission?: string; guest?: boolean; step?: number }
+  interface RouteMeta { title?: string; subtitle?: string; permission?: string; guest?: boolean; step?: number; fullBleed?: boolean }
 }
 
 const ComingSoon = () => import('@/views/ComingSoonView.vue')
@@ -23,12 +23,17 @@ const SCREENS: Record<string, { subtitle: string; step: number }> = {
   settings: { subtitle: 'Seuils, utilisateurs et simulateur', step: 7 },
 }
 
+/** Écrans déjà livrés (les autres affichent « bientôt disponible »). */
+const VIEWS: Record<string, { component: RouteRecordRaw['component']; fullBleed?: boolean }> = {
+  tracking: { component: () => import('@/views/TrackingView.vue'), fullBleed: true },
+}
+
 const appRoutes: RouteRecordRaw[] = NAV.map((item) => ({
   path: item.to.slice(1),
   name: item.name,
-  component: ComingSoon,
-  meta: { title: item.label, permission: item.permission, ...SCREENS[item.name] },
-}))
+  component: VIEWS[item.name]?.component ?? ComingSoon,
+  meta: { title: item.label, permission: item.permission, fullBleed: VIEWS[item.name]?.fullBleed, ...SCREENS[item.name] },
+}) as RouteRecordRaw)
 
 const routes: RouteRecordRaw[] = [
   { path: '/connexion', name: 'login', component: () => import('@/views/LoginView.vue'), meta: { guest: true, title: 'Connexion' } },
@@ -41,6 +46,7 @@ const routes: RouteRecordRaw[] = [
         return NAV.find((i) => auth.can(i.permission))?.to ?? '/acces-refuse'
       } },
       ...appRoutes,
+      { path: 'camions/:id', name: 'vehicle-detail', component: ComingSoon, meta: { title: 'Fiche camion', subtitle: 'Détail d’un camion', permission: 'vehicles.view', step: 4 } },
       { path: 'acces-refuse', name: 'forbidden', component: () => import('@/views/ForbiddenView.vue'), meta: { title: 'Accès refusé' } },
       { path: ':pathMatch(.*)*', name: 'not-found', component: () => import('@/views/NotFoundView.vue'), meta: { title: 'Page introuvable' } },
     ],

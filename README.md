@@ -65,7 +65,7 @@ Au premier démarrage, le conteneur `app` installe les dépendances Composer, ap
 | `reverb` | Serveur WebSocket Laravel Reverb |
 | `queue` | `php artisan queue:work` |
 | `scheduler` | `php artisan schedule:work` |
-| `simulator` | Simulateur GPS, livré à l'étape 3 (déjà prévu, en commentaire) |
+| `simulator` | Simulateur GPS (`php artisan fleet:simulate`) |
 
 Commandes utiles :
 
@@ -116,11 +116,39 @@ cd backend  && php artisan serve --port=8000             # API
 cd backend  && php artisan reverb:start --port=8081      # WebSocket
 cd backend  && php artisan queue:work                    # file d'attente
 cd backend  && php artisan schedule:work                 # tâches planifiées
-cd backend  && php artisan fleet:simulate                # simulateur (étape 3)
+cd backend  && php artisan fleet:simulate                # simulateur GPS
 cd frontend && npm run dev                               # http://localhost:5173
 ```
 
 En développement, Vite relaie `/api`, `/sanctum`, `/broadcasting` (vers le port 8000) et `/app` (WebSocket, vers le port 8081). Le front et l'API sont donc sur la même origine : le cookie de session Sanctum fonctionne sans configuration CORS.
+
+## Simulateur GPS
+
+```bash
+php artisan fleet:simulate              # une position par camion toutes les 5 s
+php artisan fleet:simulate --speed=3    # temps accéléré x3 (trajets et arrêts plus courts)
+php artisan fleet:simulate --paused     # démarre en pause
+```
+
+Les 11 camions actifs roulent sur 9 itinéraires routiers réels autour de Casablanca (tracés OSRM simplifiés, de 30 à 60 points chacun). Chaque camion suit ce cycle :
+
+1. Badge d'entrée au dépôt.
+2. 1 à 3 trajets vers les clients, l'usine, le chantier ou le port, avec des arrêts de 5 à 60 min sur place.
+3. Badge de sortie, puis pause avant le service suivant.
+
+Une mission en cours impose son point de départ et sa destination.
+
+Chaque position fait quatre choses : elle est enregistrée dans `positions`, elle met à jour `vehicle_live_status`, elle passe par la détection des zones, puis elle est diffusée sur le canal privé `fleet` (événement `position.updated`).
+
+La détection des zones applique un anti-rebond : une visite n'est comptée que si le camion reste dans la zone au moins `min_visit_seconds`. En sortie, une marge de 25 m absorbe l'imprécision du GPS.
+
+Événements simulés :
+- excès de vitesse ;
+- perte de signal d'environ 15 min, à peu près toutes les 45 min (le camion passe hors ligne au bout de 10 min) ;
+- au premier lancement, une prise de service hors dépôt (CAM-15, à l'usine de Mohammedia) et une sortie non pointée (CAM-21) ;
+- ensuite, de façon aléatoire et rare, un badge inconnu ou un oubli de badge de sortie.
+
+`php artisan fleet:check-status` est planifié chaque minute. Il passe hors ligne les camions silencieux et signale les sorties non pointées.
 
 ## Tests
 
@@ -132,7 +160,7 @@ cd backend && ./vendor/bin/pest
 
 - [x] Étape 1 : structure, Docker, authentification (verrouillage après 5 échecs, « Se souvenir de moi »), rôles et permissions, layout Vue
 - [x] Étape 2 : migrations, modèles, seeders
-- [ ] Étape 3 : simulateur, temps réel, suivi GPS en direct
+- [x] Étape 3 : simulateur, temps réel, suivi GPS en direct
 - [ ] Étape 4 : tableau de bord, camions, chauffeurs
 - [ ] Étape 5 : historique et GPS Replay
 - [ ] Étape 6 : zones, visites, pointages

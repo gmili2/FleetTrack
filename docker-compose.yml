@@ -67,11 +67,10 @@ services:
     command: [ "php", "artisan", "schedule:work" ]
     depends_on: [ app ]
 
-  # Simulateur GPS (étape 3) :
-  # simulator:
-  #   <<: *backend
-  #   command: [ "php", "artisan", "fleet:simulate" ]
-  #   depends_on: [ app, reverb ]
+  simulator:
+    <<: *backend
+    command: [ "php", "artisan", "fleet:simulate" ]
+    depends_on: [ app, reverb ]
 
   nginx:
     build: { context: ., dockerfile: docker/nginx/Dockerfile }

@@ -38,22 +38,26 @@ class MissionSeeder extends Seeder
         $v = Vehicle::with('currentDriver')->get()->keyBy('name');
         $author = User::where('email', 'flotte@demo.ma')->value('id');
         $today = CarbonImmutable::now(self::TZ)->startOfDay();
-        $at = fn (int $dayOffset, string $hm) => $today->addDays($dayOffset)->setTimeFromTimeString($hm)->utc();
+        $now = CarbonImmutable::now()->startOfMinute();
+        // Jour J : heures relatives à maintenant (« +45 » = dans 45 min) pour une démo cohérente à toute heure.
+        $at = fn (int $dayOffset, string $hm) => $dayOffset === 0 && preg_match('/^[+-]\d+$/', $hm)
+            ? $now->addMinutes((int) $hm)
+            : $today->addDays($dayOffset)->setTimeFromTimeString($hm)->utc();
 
         $depot = GeofenceSeeder::DEPOT;
         // camion, départ, destination, jour, début, fin prévue, statut
         $plan = [
             // En cours (maquette)
-            ['CAM-12', $depot, 'Client — Atlas Béton', 0, '09:40', '11:00', MissionStatus::InProgress],
-            ['CAM-07', $depot, 'Client — Atlas Béton', 0, '09:58', '11:30', MissionStatus::InProgress],
-            ['CAM-03', 'Usine Mohammedia', 'Zone de livraison Port', 0, '10:05', '12:00', MissionStatus::InProgress],
+            ['CAM-12', $depot, 'Client — Atlas Béton', 0, '-20', '+60', MissionStatus::InProgress],
+            ['CAM-07', $depot, 'Client — Atlas Béton', 0, '-10', '+80', MissionStatus::InProgress],
+            ['CAM-03', 'Usine Mohammedia', 'Zone de livraison Port', 0, '-5', '+115', MissionStatus::InProgress],
             // En attente
-            ['CAM-18', $depot, 'Chantier Lissasfa', 0, '13:00', '15:30', MissionStatus::Pending],
-            ['CAM-09', $depot, 'Client — Maghreb Agro', 0, '14:00', '17:00', MissionStatus::Pending],
+            ['CAM-18', $depot, 'Chantier Lissasfa', 0, '+180', '+330', MissionStatus::Pending],
+            ['CAM-09', $depot, 'Client — Maghreb Agro', 0, '+240', '+420', MissionStatus::Pending],
             ['CAM-01', $depot, 'Client — Sahara Distribution', 1, '08:00', '10:00', MissionStatus::Pending],
             ['CAM-05', 'Usine Mohammedia', 'Client — Casa Matériaux', 1, '09:30', '12:30', MissionStatus::Pending],
             // Terminée aujourd'hui
-            ['CAM-09', 'Usine Mohammedia', $depot, 0, '07:10', '09:00', MissionStatus::Completed],
+            ['CAM-09', 'Usine Mohammedia', $depot, 0, '-300', '-190', MissionStatus::Completed],
             // Annulées
             ['CAM-21', $depot, 'Chantier Lissasfa', -1, '15:00', '17:00', MissionStatus::Cancelled],
             ['CAM-11', $depot, 'Zone de livraison Port', -4, '08:30', '10:30', MissionStatus::Cancelled],

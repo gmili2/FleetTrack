@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Statuts « hors ligne » et sorties non pointées, même si le simulateur est arrêté.
+Schedule::command('fleet:check-status')->everyMinute()->withoutOverlapping();

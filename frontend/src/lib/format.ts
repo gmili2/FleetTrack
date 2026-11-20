@@ -28,3 +28,6 @@ export function fDuration(seconds?: number | null): string {
   if (h === 0) return `${m} min`
   return `${h} h ${String(m).padStart(2, '0')}`
 }
+
+const timeSecF = fmt({ hour: '2-digit', minute: '2-digit', second: '2-digit' })
+export const fTimeSec = (v?: string | Date | null) => { const d = toDate(v); return d ? timeSecF.format(d) : '—' }
