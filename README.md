@@ -23,6 +23,7 @@ Le mot de passe de tous les comptes est `password`.
 | Administrateur | admin@demo.ma | Tous les droits, sauf la gestion des super administrateurs |
 | Responsable de flotte | flotte@demo.ma | Camions, chauffeurs, zones, missions, rapports. Pas d'utilisateurs ni de paramètres |
 | Opérateur | operateur@demo.ma | Lecture et missions. Pas de suppression ni d'export |
+| Chauffeur | chauffeur@demo.ma | Espace « Mon service » uniquement. Compte lié à Jamal Ouazzani (CH-1096, badge B-4446) |
 
 Après 5 échecs de connexion d'affilée, le compte est verrouillé pendant 15 minutes.
 
@@ -121,6 +122,19 @@ cd frontend && npm run dev                               # http://localhost:5173
 ```
 
 En développement, Vite relaie `/api`, `/sanctum`, `/broadcasting` (vers le port 8000) et `/app` (WebSocket, vers le port 8081). Le front et l'API sont donc sur la même origine : le cookie de session Sanctum fonctionne sans configuration CORS.
+
+## Espace chauffeur
+
+Un compte du rôle **Chauffeur** est lié à une fiche chauffeur. Il n'a accès qu'à l'écran « Mon service », pensé pour le téléphone :
+
+1. **Pointer l'entrée** : le chauffeur choisit un camion à l'arrêt. Le pointage est enregistré à la position du boîtier GPS du camion, et une prise hors dépôt est signalée.
+2. Pendant le service, le boîtier du camion suit **ce chauffeur**. Sur l'écran Suivi, le camion affiche son nom et l'heure de prise. Le chauffeur voit son camion sur la carte, sa vitesse, les km parcourus et la durée du service.
+3. **Pointer la sortie** : le service est clôturé (durée, km).
+4. **Mes derniers services** : la liste de ses services, et le trajet de chacun sur la carte.
+
+Si le camion était déjà en service avec un chauffeur badgé, ce chauffeur est relevé : son service est clôturé normalement. Côté back-office, l'écran **Chauffeurs** donne la liste, le statut et le bouton « Suivre sur la carte ». L'**historique d'un chauffeur** présente ses services, ses pointages, ses km et ses anomalies, avec le trajet de chaque service (départ A, arrivée B, arrêts numérotés).
+
+Le simulateur continue de faire rouler un camion pris depuis l'application, mais il ne pointe jamais à la place du chauffeur.
 
 ## Simulateur GPS
 

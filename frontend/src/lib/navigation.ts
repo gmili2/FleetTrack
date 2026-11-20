@@ -1,10 +1,11 @@
 import type { Component } from 'vue'
-import { BarChart3, ClipboardList, Hexagon, History, IdCard, LayoutDashboard, MapPin, SlidersHorizontal, Truck, Users } from 'lucide-vue-next'
+import { BarChart3, CircleUserRound, ClipboardList, Hexagon, History, IdCard, LayoutDashboard, MapPin, SlidersHorizontal, Truck, Users } from 'lucide-vue-next'
 
-export type NavItem = { name: string; label: string; to: string; icon: Component; permission: string }
+export type NavItem = { name: string; label: string; to: string; icon: Component; permission: string; driverOnly?: boolean }
 
 /** Menu principal (ordre de la maquette) ; chaque entrée est filtrée par permission. */
 export const NAV: NavItem[] = [
+  { name: 'driver-portal', label: 'Mon service', to: '/mon-service', icon: CircleUserRound, permission: 'driver_portal.use', driverOnly: true },
   { name: 'dashboard', label: 'Tableau de bord', to: '/tableau-de-bord', icon: LayoutDashboard, permission: 'dashboard.view' },
   { name: 'tracking', label: 'Suivi temps réel', to: '/suivi', icon: MapPin, permission: 'tracking.view' },
   { name: 'history', label: 'Historique', to: '/historique', icon: History, permission: 'history.view' },

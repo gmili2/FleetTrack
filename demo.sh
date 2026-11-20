@@ -44,7 +44,7 @@ trap 'echo; echo "■ Arrêt de la démo…"; kill ${pids[@]} 2>/dev/null; exit 
 sleep 4
 echo
 echo "✅ FleetTrack est prêt : http://localhost:5173"
-echo "   Comptes (mot de passe « password ») : superadmin@demo.ma · admin@demo.ma · flotte@demo.ma · operateur@demo.ma"
+echo "   Comptes (mot de passe « password ») : superadmin@demo.ma · admin@demo.ma · flotte@demo.ma · operateur@demo.ma · chauffeur@demo.ma"
 echo "   Journaux : $ROOT/.logs/   —   Ctrl+C pour tout arrêter"
 open http://localhost:5173 2>/dev/null || true
 wait

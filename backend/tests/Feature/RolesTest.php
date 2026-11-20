@@ -29,6 +29,13 @@ it('limite le responsable de flotte (ni utilisateurs ni paramètres)', function 
         ->and($m->can('settings.update'))->toBeFalse();
 });
 
+it('donne au chauffeur uniquement son espace', function () use ($u) {
+    $c = $u('chauffeur@demo.ma');
+    expect($c->can('driver_portal.use'))->toBeTrue()
+        ->and($c->can('tracking.view'))->toBeFalse()
+        ->and($u('admin@demo.ma')->can('driver_portal.use'))->toBeFalse();
+});
+
 it('limite l’opérateur à la lecture et aux missions, sans suppression ni export', function () use ($u) {
     $o = $u('operateur@demo.ma');
     expect($o->can('vehicles.view'))->toBeTrue()

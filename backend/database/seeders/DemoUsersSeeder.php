@@ -16,6 +16,7 @@ class DemoUsersSeeder extends Seeder
             ['admin@demo.ma', 'Nadia Chraibi', Roles::ADMIN, '0662 11 22 33'],
             ['flotte@demo.ma', 'Salma Bennani', Roles::FLEET_MANAGER, '0663 44 55 66'],
             ['operateur@demo.ma', 'Karim Tazi', Roles::OPERATOR, '0664 77 88 99'],
+            ['chauffeur@demo.ma', 'Jamal Ouazzani', Roles::DRIVER, '+212 6 00 00 00 13'],
         ];
 
         foreach ($users as [$email, $name, $role, $phone]) {
@@ -27,6 +28,10 @@ class DemoUsersSeeder extends Seeder
             ]);
             $user->forceFill(['email_verified_at' => now(), 'failed_login_attempts' => 0, 'locked_until' => null])->save();
             $user->syncRoles([$role]);
+            if ($role === Roles::DRIVER) {
+                // Compte lié au chauffeur Jamal Ouazzani (CH-1096, badge B-4446).
+                $user->forceFill(['driver_id' => \App\Models\Driver::where('employee_number', 'CH-1096')->value('id')])->save();
+            }
         }
     }
 }

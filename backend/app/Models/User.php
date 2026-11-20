@@ -11,7 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'phone', 'is_active'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'is_active', 'driver_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -31,6 +31,12 @@ class User extends Authenticatable
             'locked_until' => 'datetime',
             'last_login_at' => 'datetime',
         ];
+    }
+
+    /** Chauffeur lié au compte (rôle Chauffeur). */
+    public function driver(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Driver::class);
     }
 
     public function isLocked(): bool

@@ -84,7 +84,30 @@ class Simulator
         $this->simTime += $dt;
         $this->maybeDropSignal($now);
 
+        // Services ouverts (badge ou application) : source de vérité pour savoir qui conduit.
+        $open = DriverShift::with('driver:id,first_name,last_name,phone,employee_number,badge_number')->whereNull('end_at')->get();
+        $byVehicle = $open->keyBy('vehicle_id');
+        $busyDrivers = $open->pluck('vehicle_id', 'driver_id');
+
         foreach ($this->trucks as $t) {
+            $shift = $byVehicle->get($t->vehicle->id);
+            $t->vehicle->setRelation('openShift', $shift);
+            $wasApp = $t->appDriven;
+            $t->onShift = $shift !== null;
+            $t->appDriven = $shift?->source === 'app';
+            if ($wasApp && ! $t->appDriven && $t->state === TruckSim::PARKED) {
+                // Le chauffeur vient de pointer sa sortie : le camion reste garé un moment.
+                $t->until = $this->simTime + 60 * random_int(20, 40);
+                $this->say("{$t->vehicle->name} : fin de service pointée depuis l’application");
+            }
+            if (! $wasApp && $t->appDriven) {
+                $this->say("{$t->vehicle->name} : pris en main par {$shift->driver?->full_name} (application)");
+                if ($t->state === TruckSim::PARKED) {
+                    $t->until = $this->simTime + 20; // départ peu après la prise de service
+                }
+            }
+            $t->driverBusyElsewhere = ($d = $t->vehicle->current_driver_id) && $busyDrivers->has($d) && $busyDrivers->get($d) !== $t->vehicle->id;
+
             match ($t->state) {
                 TruckSim::PARKED => $this->parked($t, $now),
                 TruckSim::DWELL => $this->dwell($t),
@@ -106,7 +129,15 @@ class Simulator
             return;
         }
         if (! $t->onShift) {
+            if ($t->driverBusyElsewhere) {
+                $t->until = $this->simTime + 300; // son chauffeur conduit un autre camion
+
+                return;
+            }
             $this->startShift($t, $now);
+            if (! $t->onShift) {
+                return;
+            }
         }
         $this->planTour($t);
         $this->departNextLeg($t);
@@ -234,6 +265,12 @@ class Simulator
         $t->speed = 0;
         $t->ignition = false;
         $t->tripsLeft--;
+        if ($t->appDriven) {
+            // Chauffeur « réel » : il enchaîne les trajets jusqu'à ce qu'il pointe sa sortie.
+            $t->until = $this->simTime + 60 * random_int(3, 8);
+
+            return;
+        }
         if ($t->missionId) {
             $t->doneMissions[] = $t->missionId;
             $t->missionId = null;

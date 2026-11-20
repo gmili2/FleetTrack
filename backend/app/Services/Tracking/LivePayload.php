@@ -11,7 +11,7 @@ use App\Models\Vehicle;
 class LivePayload
 {
     /** Relations à précharger. */
-    public const WITH = ['liveStatus.geofence:id,name,type', 'currentDriver:id,first_name,last_name,phone,employee_number,badge_number', 'device:id,vehicle_id,imei,model'];
+    public const WITH = ['liveStatus.geofence:id,name,type', 'currentDriver:id,first_name,last_name,phone,employee_number,badge_number', 'device:id,vehicle_id,imei,model', 'openShift.driver:id,first_name,last_name,phone,employee_number,badge_number'];
 
     public static function make(Vehicle $v, ?Mission $mission = null, bool $withMission = true): array
     {
@@ -21,6 +21,10 @@ class LivePayload
             $mission = Mission::with(['origin:id,name', 'destination:id,name'])
                 ->where('vehicle_id', $v->id)->where('status', MissionStatus::InProgress)->first();
         }
+
+        // Le chauffeur suivi est celui qui a pointé sur le camion ; à défaut, le chauffeur affecté.
+        $shift = $v->openShift;
+        $driver = $shift?->driver ?? $v->currentDriver;
 
         return [
             'id' => $v->id,
@@ -44,12 +48,21 @@ class LivePayload
             'zone' => $l?->geofence ? ['id' => $l->geofence->id, 'name' => $l->geofence->name, 'type' => $l->geofence->type->value] : null,
             'today_distance_km' => round($l?->today_distance_km ?? 0, 1),
             'last_position_at' => $l?->last_position_at?->toIso8601String(),
-            'driver' => $v->currentDriver ? [
-                'id' => $v->currentDriver->id,
-                'name' => $v->currentDriver->full_name,
-                'phone' => $v->currentDriver->phone,
-                'employee_number' => $v->currentDriver->employee_number,
-                'badge_number' => $v->currentDriver->badge_number,
+            'driver' => $driver ? [
+                'id' => $driver->id,
+                'name' => $driver->full_name,
+                'phone' => $driver->phone,
+                'employee_number' => $driver->employee_number,
+                'badge_number' => $driver->badge_number,
+                'on_shift' => $shift !== null && $shift->driver_id === $driver->id,
+            ] : null,
+            'shift' => $shift ? [
+                'id' => $shift->id,
+                'start_at' => $shift->start_at->toIso8601String(),
+                'start_place' => $shift->start_place,
+                'source' => $shift->source,
+                'anomaly' => $shift->anomaly?->value,
+                'unknown_badge' => $shift->driver_id === null ? $shift->badge_number : null,
             ] : null,
             'device' => $v->device ? ['imei' => $v->device->imei, 'model' => $v->device->model] : null,
             'mission' => $mission ? [

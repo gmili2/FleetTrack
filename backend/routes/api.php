@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DriverController;
+use App\Http\Controllers\Api\DriverPortalController;
 use App\Http\Controllers\Api\LiveController;
 use App\Http\Controllers\Api\NotificationController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +30,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/live/geofences', [LiveController::class, 'geofences']);
         Route::get('/live/{vehicle}', [LiveController::class, 'show']);
     });
+
+    // Espace chauffeur (rôle Chauffeur)
+    Route::middleware('can:driver_portal.use')->prefix('me/driver')->group(function () {
+        Route::get('/', [DriverPortalController::class, 'show']);
+        Route::get('/vehicles', [DriverPortalController::class, 'vehicles']);
+        Route::post('/clock-in', [DriverPortalController::class, 'clockIn'])->middleware('throttle:10,1');
+        Route::post('/clock-out', [DriverPortalController::class, 'clockOut'])->middleware('throttle:10,1');
+        Route::get('/shifts/{shift}/track', [DriverPortalController::class, 'track']);
+    });
+
+    // Chauffeurs et historique de leurs services
+    Route::get('/drivers', [DriverController::class, 'index'])->middleware('can:drivers.view');
+    Route::get('/drivers/{driver}/shifts', [DriverController::class, 'shifts'])->middleware('can:drivers.view');
+    Route::get('/shifts/{shift}/track', [DriverController::class, 'track'])->middleware('can:shifts.view');
 
     // Les autres modules métier (camions, chauffeurs, missions…) arrivent aux étapes suivantes,
     // chacun protégé par ses Policies et les permissions « module.action ».

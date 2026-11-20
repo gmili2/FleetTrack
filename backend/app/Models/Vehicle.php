@@ -46,6 +46,12 @@ class Vehicle extends Model
         return $this->hasOne(VehicleLiveStatus::class);
     }
 
+    /** Service en cours sur ce camion (le chauffeur réellement au volant). */
+    public function openShift(): HasOne
+    {
+        return $this->hasOne(DriverShift::class)->whereNull('end_at')->latestOfMany('start_at');
+    }
+
     public function assignments(): HasMany
     {
         return $this->hasMany(VehicleAssignment::class);

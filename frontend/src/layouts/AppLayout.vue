@@ -14,7 +14,7 @@ const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 
-const menu = computed(() => NAV.filter((i) => auth.can(i.permission)))
+const menu = computed(() => NAV.filter((i) => auth.canSee(i)))
 const title = computed(() => (route.meta.title as string) ?? 'FleetTrack')
 const subtitle = computed(() => route.meta.subtitle as string | undefined)
 
@@ -104,7 +104,7 @@ const isActive = (to: string) => route.path === to || route.path.startsWith(to +
           <h1 class="m-0 truncate text-xl font-bold text-ink">{{ title }}</h1>
           <div v-if="subtitle" class="truncate text-[13px] text-muted">{{ subtitle }}</div>
         </div>
-        <label class="order-last flex h-10 w-full items-center gap-2 rounded-[10px] border border-line bg-page px-3 text-muted sm:order-none sm:w-auto sm:flex-[0_1_360px]">
+        <label v-if="auth.can('tracking.view')" class="order-last flex h-10 w-full items-center gap-2 rounded-[10px] border border-line bg-page px-3 text-muted sm:order-none sm:w-auto sm:flex-[0_1_360px]">
           <Search :size="17" :stroke-width="1.8" aria-hidden="true" class="flex-none" />
           <span class="sr-only">Rechercher</span>
           <input v-model="search" type="search" placeholder="Rechercher un camion, un chauffeur, une mission…" class="min-w-0 flex-1 border-0 bg-transparent text-sm text-ink outline-none" />

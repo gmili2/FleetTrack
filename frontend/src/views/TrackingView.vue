@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import L from 'leaflet'
-import { ClipboardList, Crosshair, History, Phone, Radio, Search, Truck, WifiOff } from 'lucide-vue-next'
+import { ClipboardList, Crosshair, History, Phone, Radio, Search, Smartphone, Truck, WifiOff } from 'lucide-vue-next'
 import { http } from '@/lib/http'
 import { fDuration, fKm, fTime, fTimeSec } from '@/lib/format'
 import { ago, cardinal, since } from '@/lib/time'
@@ -44,7 +44,7 @@ const selectedId = ref<number | null>(route.query.v ? Number(route.query.v) : nu
 const selected = computed(() => (selectedId.value ? fleet.vehicles[selectedId.value] : null))
 const detail = ref<LiveDetail | null>(null)
 const detailLoading = ref(false)
-const follow = ref(false)
+const follow = ref(route.query.follow === '1')
 
 async function loadDetail() {
   if (!selectedId.value) return
@@ -61,7 +61,7 @@ async function loadDetail() {
 }
 
 function select(id: number, fly = true) {
-  if (selectedId.value !== id) { follow.value = false; detail.value = null }
+  if (selectedId.value !== id) { follow.value = route.query.follow === '1' && String(id) === route.query.v; detail.value = null }
   selectedId.value = id
   router.replace({ query: { ...route.query, v: String(id) } })
   const v = fleet.vehicles[id]
@@ -191,7 +191,10 @@ const simulatorDown = computed(() => {
               <span class="min-w-0 truncate text-[15px] font-bold whitespace-nowrap text-ink">{{ v.name }} <span class="text-[13px] font-medium text-muted">· {{ v.plate_number }}</span></span>
               <StatusBadge :status="v.status" />
             </span>
-            <span class="text-[13px] text-ink">{{ v.driver?.name ?? 'Sans chauffeur' }}</span>
+            <span class="flex items-center justify-between gap-2 text-[13px] text-ink">
+              <span class="truncate">{{ v.driver?.name ?? (v.shift?.unknown_badge ? `Badge inconnu ${v.shift.unknown_badge}` : 'Sans chauffeur') }}</span>
+              <span v-if="v.shift" class="inline-flex flex-none items-center gap-1 text-xs text-muted"><Smartphone v-if="v.shift.source === 'app'" :size="12" aria-label="pointé depuis l’application" />service {{ fTime(v.shift.start_at) }}</span>
+            </span>
             <span class="flex w-full justify-between gap-2 text-xs text-muted">
               <span class="truncate">{{ v.address ?? '—' }}</span>
               <span class="num font-semibold whitespace-nowrap text-ink">{{ v.status === 'offline' ? '—' : `${v.speed_kmh} km/h` }}</span>
@@ -259,11 +262,12 @@ const simulatorDown = computed(() => {
           <div class="flex size-10 flex-none items-center justify-center rounded-full bg-brand-soft text-[13px] font-bold text-brand-dark">{{ selected.driver.name.split(' ').map((p) => p[0]).slice(0, 2).join('') }}</div>
           <div class="min-w-0 flex-1">
             <div class="truncate text-sm font-semibold">{{ selected.driver.name }}</div>
-            <div class="truncate text-xs text-muted">Chauffeur · {{ selected.driver.employee_number }} · {{ selected.driver.phone }}</div>
+            <div class="truncate text-xs text-muted">{{ selected.driver.on_shift ? `En service depuis ${fTime(selected.shift?.start_at)}${selected.shift?.source === 'app' ? ' (application)' : ''}` : 'Chauffeur affecté · pas de pointage' }} · {{ selected.driver.employee_number }}</div>
           </div>
           <a v-if="selected.driver.phone" :href="`tel:${selected.driver.phone.replace(/\s/g, '')}`" class="btn-icon" :aria-label="`Appeler ${selected.driver.name}`"><Phone :size="16" /></a>
         </div>
-        <div v-else class="rounded-xl border border-dashed border-field p-3 text-[13px] text-muted">Aucun chauffeur affecté.</div>
+        <div v-else class="rounded-xl border border-dashed border-field p-3 text-[13px] text-muted">{{ selected.shift?.unknown_badge ? `Badge inconnu ${selected.shift.unknown_badge} : conduite non identifiée.` : 'Aucun chauffeur affecté.' }}</div>
+        <RouterLink v-if="selected.driver" :to="`/chauffeurs/${selected.driver.id}`" class="-mt-2 text-[13px] font-semibold">Historique de {{ selected.driver.name }} →</RouterLink>
 
         <div v-if="selected.mission" class="rounded-xl border border-line p-3">
           <div class="flex items-center justify-between gap-2"><b class="text-sm">{{ selected.mission.reference }}</b><StatusBadge tone="blue" label="En cours" :icon="ClipboardList" /></div>

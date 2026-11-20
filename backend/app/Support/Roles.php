@@ -15,12 +15,14 @@ final class Roles
     public const ADMIN = 'admin';
     public const FLEET_MANAGER = 'fleet_manager';
     public const OPERATOR = 'operator';
+    public const DRIVER = 'driver';
 
     public const LABELS = [
         self::SUPER_ADMIN => 'Super Administrateur',
         self::ADMIN => 'Administrateur',
         self::FLEET_MANAGER => 'Responsable de flotte',
         self::OPERATOR => 'Opérateur',
+        self::DRIVER => 'Chauffeur',
     ];
 
     /** Actions disponibles par module. */
@@ -37,6 +39,8 @@ final class Roles
         'users' => ['view', 'create', 'update', 'delete'],
         'settings' => ['view', 'update'],
         'simulator' => ['manage'],
+        // Espace chauffeur : pointer l'entrée / la sortie, suivre son service.
+        'driver_portal' => ['use'],
     ];
 
     /** @return list<string> */
@@ -55,7 +59,8 @@ final class Roles
     /** @return list<string> */
     public static function permissionsFor(string $role): array
     {
-        $all = self::allPermissions();
+        // L'espace chauffeur est réservé au rôle Chauffeur.
+        $all = array_values(array_filter(self::allPermissions(), fn (string $p) => ! str_starts_with($p, 'driver_portal.')));
 
         return match ($role) {
             self::SUPER_ADMIN, self::ADMIN => $all,
@@ -70,6 +75,7 @@ final class Roles
                 fn (string $p) => (str_ends_with($p, '.view') && ! str_starts_with($p, 'users.') && ! str_starts_with($p, 'settings.'))
                     || in_array($p, ['missions.create', 'missions.update', 'missions.operate'], true),
             )),
+            self::DRIVER => ['driver_portal.use'],
             default => [],
         };
     }

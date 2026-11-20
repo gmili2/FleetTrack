@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /** Passage de badge sur le lecteur d'un camion. */
 class BadgeEvent extends Model
 {
-    protected $fillable = ['badge_number', 'driver_id', 'vehicle_id', 'driver_shift_id', 'type', 'occurred_at', 'latitude', 'longitude', 'place'];
+    protected $fillable = ['badge_number', 'driver_id', 'vehicle_id', 'driver_shift_id', 'type', 'source', 'occurred_at', 'latitude', 'longitude', 'place'];
 
     protected function casts(): array
     {

@@ -37,6 +37,9 @@ class TruckSim
     public array $doneMissions = [];
 
     public bool $onShift = false;
+    /** Service ouvert depuis l'application chauffeur : le simulateur ne pointe pas à sa place. */
+    public bool $appDriven = false;
+    public bool $driverBusyElsewhere = false;
     public int $tripsLeft = 0;        // trajets restants avant la fin du service
     public bool $forgetBadgeOut = false;
     public float $offlineUntil = 0;   // perte de signal jusqu'à (temps réel)

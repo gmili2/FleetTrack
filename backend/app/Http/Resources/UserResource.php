@@ -26,6 +26,11 @@ class UserResource extends JsonResource
                 $request->routeIs('auth.me', 'auth.login'),
                 fn () => $this->isSuperAdmin() ? Roles::allPermissions() : $this->getAllPermissions()->pluck('name')->values(),
             ),
+            'driver' => $this->driver_id ? [
+                'id' => $this->driver_id,
+                'employee_number' => $this->driver?->employee_number,
+                'badge_number' => $this->driver?->badge_number,
+            ] : null,
             'last_login_at' => $this->last_login_at?->toIso8601String(),
         ];
     }

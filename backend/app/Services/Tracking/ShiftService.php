@@ -34,7 +34,8 @@ class ShiftService
 
     public function __construct(private GeofenceDetector $zones, private Alerts $alerts, public bool $notify = true) {}
 
-    public function badgeIn(Vehicle $vehicle, string $badge, CarbonInterface $at, float $lat, float $lng): DriverShift
+    /** @param string $source badge (lecteur du camion) | app (application chauffeur) */
+    public function badgeIn(Vehicle $vehicle, string $badge, CarbonInterface $at, float $lat, float $lng, string $source = 'badge'): DriverShift
     {
         $driver = Driver::where('badge_number', $badge)->first();
         $zone = $this->zones->zonesAt($lat, $lng)->sortBy(fn ($z) => $z->type === GeofenceType::Depot ? 0 : 1)->first();
@@ -52,18 +53,18 @@ class ShiftService
         };
 
         $shift = DriverShift::create([
-            'driver_id' => $driver?->id, 'vehicle_id' => $vehicle->id, 'badge_number' => $badge,
+            'driver_id' => $driver?->id, 'vehicle_id' => $vehicle->id, 'badge_number' => $badge, 'source' => $source,
             'start_at' => $at, 'start_lat' => $lat, 'start_lng' => $lng, 'start_place' => $place, 'anomaly' => $anomaly,
         ]);
         BadgeEvent::create([
             'badge_number' => $badge, 'driver_id' => $driver?->id, 'vehicle_id' => $vehicle->id, 'driver_shift_id' => $shift->id,
-            'type' => BadgeType::In, 'occurred_at' => $at, 'latitude' => $lat, 'longitude' => $lng, 'place' => $place,
+            'type' => BadgeType::In, 'source' => $source, 'occurred_at' => $at, 'latitude' => $lat, 'longitude' => $lng, 'place' => $place,
         ]);
         GpsEvent::create(['type' => GpsEventType::BadgeIn, 'vehicle_id' => $vehicle->id, 'driver_id' => $driver?->id, 'geofence_id' => $zone?->id, 'occurred_at' => $at, 'payload' => ['badge' => $badge]]);
 
         $who = $driver?->full_name ?? "Badge inconnu $badge";
         $this->activity('badge_in', "$who a badgé dans {$vehicle->name}", $vehicle, $at, [
-            'type' => 'in', 'driver' => $driver?->full_name, 'badge' => $badge, 'place' => $place, 'anomaly' => $anomaly?->value, 'shift_id' => $shift->id,
+            'type' => 'in', 'source' => $source, 'driver' => $driver?->full_name, 'driver_id' => $driver?->id, 'badge' => $badge, 'place' => $place, 'anomaly' => $anomaly?->value, 'shift_id' => $shift->id,
         ]);
         if ($anomaly) {
             $this->alert($anomaly, $vehicle, "$who · {$vehicle->name} · $place");
@@ -72,7 +73,7 @@ class ShiftService
         return $shift;
     }
 
-    public function badgeOut(Vehicle $vehicle, string $badge, CarbonInterface $at, float $lat, float $lng): ?DriverShift
+    public function badgeOut(Vehicle $vehicle, string $badge, CarbonInterface $at, float $lat, float $lng, string $source = 'badge'): ?DriverShift
     {
         $driver = Driver::where('badge_number', $badge)->first();
         $zone = $this->zones->zonesAt($lat, $lng)->sortBy(fn ($z) => $z->type === GeofenceType::Depot ? 0 : 1)->first();
@@ -84,12 +85,12 @@ class ShiftService
         }
         BadgeEvent::create([
             'badge_number' => $badge, 'driver_id' => $driver?->id, 'vehicle_id' => $vehicle->id, 'driver_shift_id' => $shift?->id,
-            'type' => BadgeType::Out, 'occurred_at' => $at, 'latitude' => $lat, 'longitude' => $lng, 'place' => $place,
+            'type' => BadgeType::Out, 'source' => $source, 'occurred_at' => $at, 'latitude' => $lat, 'longitude' => $lng, 'place' => $place,
         ]);
         GpsEvent::create(['type' => GpsEventType::BadgeOut, 'vehicle_id' => $vehicle->id, 'driver_id' => $driver?->id, 'geofence_id' => $zone?->id, 'occurred_at' => $at, 'payload' => ['badge' => $badge]]);
         $who = $driver?->full_name ?? "Badge inconnu $badge";
         $this->activity('badge_out', "$who a badgé la sortie de {$vehicle->name}", $vehicle, $at, [
-            'type' => 'out', 'driver' => $driver?->full_name, 'badge' => $badge, 'place' => $place, 'shift_id' => $shift?->id,
+            'type' => 'out', 'source' => $source, 'driver' => $driver?->full_name, 'driver_id' => $driver?->id, 'badge' => $badge, 'place' => $place, 'shift_id' => $shift?->id,
             'duration_seconds' => $shift?->duration_seconds, 'distance_km' => $shift?->distance_km,
         ]);
 
