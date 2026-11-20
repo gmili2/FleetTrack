@@ -13,15 +13,15 @@ const ComingSoon = () => import('@/views/ComingSoonView.vue')
 const SCREENS: Record<string, { subtitle: string; step?: number }> = {
   'driver-portal': { subtitle: 'Pointage et suivi de mon service' },
   dashboard: { subtitle: 'Vue d’ensemble de la flotte' },
-  tracking: { subtitle: 'Position des camions en direct', step: 3 },
+  tracking: { subtitle: 'Position des camions en direct' },
   history: { subtitle: 'Trajets et GPS Replay' },
   vehicles: { subtitle: 'Parc de camions et boîtiers GPS' },
   drivers: { subtitle: 'Matricules, badges, permis et historique' },
   shifts: { subtitle: 'Prises et fins de service par badge' },
-  missions: { subtitle: 'Planification et suivi des missions', step: 7 },
+  missions: { subtitle: 'Planification et suivi des missions' },
   geofences: { subtitle: 'Dépôts, clients, chantiers et zones de livraison' },
-  reports: { subtitle: 'Kilométrage, conduite, visites et activité', step: 7 },
-  settings: { subtitle: 'Seuils, utilisateurs et simulateur', step: 7 },
+  reports: { subtitle: 'Kilométrage, conduite, visites et activité' },
+  settings: { subtitle: 'Seuils, utilisateurs et simulateur' },
 }
 
 /** Écrans déjà livrés (les autres affichent « bientôt disponible »). */
@@ -33,6 +33,9 @@ const VIEWS: Record<string, { component: RouteRecordRaw['component']; fullBleed?
   history: { component: () => import('@/views/HistoryView.vue') },
   geofences: { component: () => import('@/views/ZonesView.vue'), fullBleed: true },
   shifts: { component: () => import('@/views/ShiftsView.vue') },
+  missions: { component: () => import('@/views/MissionsView.vue') },
+  reports: { component: () => import('@/views/ReportsView.vue') },
+  settings: { component: () => import('@/views/SettingsView.vue') },
   drivers: { component: () => import('@/views/DriversView.vue') },
 }
 

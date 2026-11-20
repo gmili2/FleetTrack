@@ -72,3 +72,13 @@ export type ZoneRow = {
   color: string; customer: { id: number; code: string; name: string } | null; min_visit_seconds: number; address: string | null
   is_active: boolean; visits_today?: number; vehicles_inside?: number
 }
+
+export type MissionRow = {
+  id: number; reference: string; status: 'pending' | 'in_progress' | 'completed' | 'cancelled'; status_label: string; status_tone: 'gray' | 'blue' | 'green' | 'red'; late: boolean
+  vehicle: { id: number; name: string; plate_number: string } | null; driver: { id: number; name: string; phone: string | null } | null
+  customer: { id: number; name: string; code: string } | null; origin: { id: number; name: string } | null; destination: { id: number; name: string } | null
+  planned_start_at: string; planned_end_at: string; actual_start_at: string | null; actual_end_at: string | null
+  cargo: string | null; notes: string | null; cancel_reason: string | null; distance_km: number | null; created_by: string | null
+  events?: { id: number; type: string; label: string; message: string; author: string | null; automatic: boolean; occurred_at: string }[]
+  can: { update: boolean; operate: boolean; delete: boolean }
+}

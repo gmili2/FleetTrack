@@ -6,6 +6,10 @@ use App\Http\Controllers\Api\GeofenceController;
 use App\Http\Controllers\Api\ShiftController;
 use App\Http\Controllers\Api\ZoneVisitController;
 use App\Http\Controllers\Api\HistoryController;
+use App\Http\Controllers\Api\MissionController;
+use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\DriverPortalController;
@@ -80,6 +84,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/geofences/{geofence}/visits', [ZoneVisitController::class, 'index']);
     Route::get('/geofences/{geofence}/visits/export', [ZoneVisitController::class, 'export']);
 
-    // Les autres modules métier (camions, chauffeurs, missions…) arrivent aux étapes suivantes,
-    // chacun protégé par ses Policies et les permissions « module.action ».
+    // Missions (MissionPolicy)
+    Route::get('/missions/export', [MissionController::class, 'export']);
+    Route::apiResource('missions', MissionController::class);
+    Route::post('/missions/{mission}/{action}', [MissionController::class, 'transition'])->whereIn('action', ['start', 'complete', 'cancel', 'comment']);
+
+    // Rapports
+    Route::get('/reports/{type}', [ReportController::class, 'show']);
+    Route::get('/reports/{type}/export', [ReportController::class, 'export']);
+
+    // Paramètres, utilisateurs et rôles
+    Route::get('/settings', [SettingsController::class, 'show']);
+    Route::put('/settings/thresholds', [SettingsController::class, 'thresholds']);
+    Route::post('/settings/simulator', [SettingsController::class, 'simulator']);
+    Route::get('/audit-logs', [SettingsController::class, 'audit']);
+    Route::apiResource('users', UserController::class)->except('show');
+    Route::post('/users/{user}/unlock', [UserController::class, 'unlock']);
 });

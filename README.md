@@ -164,6 +164,22 @@ La détection des zones applique un anti-rebond : une visite n'est comptée que 
 
 `php artisan fleet:check-status` est planifié chaque minute. Il passe hors ligne les camions silencieux et signale les sorties non pointées.
 
+## Missions, rapports et paramètres
+
+- **Missions** :
+  - compteurs par statut (en attente, en cours avec retards, terminées aujourd'hui, annulées dans le mois), filtres, export Excel ;
+  - panneau de détail avec le journal des événements, alimenté par les utilisateurs et automatiquement par le GPS ;
+  - actions **Démarrer**, **Terminer** et **Annuler** (motif obligatoire), commentaires, création et modification ;
+  - règle métier : un camion ou un chauffeur n'a jamais plus d'une mission en cours, garanti par un verrou en base au démarrage.
+- **Rapports** :
+  - 6 rapports : kilométrage (par jour, semaine ou mois), conduite et arrêt, temps chez les clients, visites par zone, activité par chauffeur, activité par camion ;
+  - pour chacun : période, filtre camion, indicateurs, graphique, tableau détaillé, export **PDF** et **Excel**.
+- **Paramètres** :
+  - seuils (mouvement, hors ligne, arrêt), appliqués immédiatement, simulateur compris ;
+  - simulateur GPS : état du processus, pause et reprise ;
+  - utilisateurs et rôles : création, modification, désactivation, déverrouillage, liaison d'un compte Chauffeur à sa fiche. Un administrateur ne peut pas gérer les super administrateurs ;
+  - journal d'audit.
+
 ## Zones, visites et pointages
 
 - **Zones** :
@@ -226,5 +242,5 @@ cd backend && ./vendor/bin/pest
 - [x] Étape 4 : tableau de bord, camions, chauffeurs (+ espace chauffeur et historique 30 jours)
 - [x] Étape 5 : historique et GPS Replay
 - [x] Étape 6 : zones, visites, pointages
-- [ ] Étape 7 : missions, rapports, exports, paramètres
+- [x] Étape 7 : missions, rapports, exports, paramètres
 - [ ] Étape 8 : tests, README, vérification finale
