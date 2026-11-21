@@ -42,7 +42,7 @@ Le mot de passe de tous les comptes est `password`. Sur l'écran de connexion, u
 |---|---|---|
 | Super Administrateur | superadmin@demo.ma | Tous les droits |
 | Administrateur | admin@demo.ma | Tous les droits, sauf la gestion des super administrateurs |
-| Responsable de flotte | flotte@demo.ma | Camions, chauffeurs, zones, missions, rapports. Pas d'utilisateurs ni de paramètres |
+| Responsable de flotte | flotte@demo.ma | Camions, cartes GPS, chauffeurs, zones, missions, rapports. Pas d'utilisateurs ni de paramètres |
 | Opérateur | operateur@demo.ma | Lecture partout et missions (créer, démarrer, terminer). Pas de suppression ni d'export |
 | Chauffeur | chauffeur@demo.ma | Écran « Mon service » uniquement. Compte lié à Jamal Ouazzani (CH-1096, badge B-4446) |
 
@@ -58,6 +58,7 @@ Après 5 échecs de connexion d'affilée, le compte est verrouillé 15 minutes. 
 | **Historique / GPS Replay** | Camion et période, tracé avec départ A, arrivée B et arrêts numérotés, synthèse, chronologie cliquable, lecteur animé x1 à x20 (x1 = 30 s de trajet par seconde), export Excel |
 | **Camions** | Création, modification et suppression (avec boîtier GPS et chauffeur affecté), filtres, tri et pagination côté serveur, export Excel |
 | **Fiche camion** | Mini-carte en direct, indicateurs sur 30 jours, onglets Trajets (bouton « Rejouer »), Visites, Missions, Affectations, Boîtier |
+| **Cartes GPS** | Création, modification et suppression des cartes (IMEI, SIM, opérateur, camion où elle est installée), filtres Installées / Libres / En service / Désactivées, et **configuration de chaque carte** : protocole, serveur et port, APN, cadence d'envoi en mouvement et à l'arrêt, changement de cap, distance, seuil de survitesse, contact moteur, conduite brusque |
 | **Chauffeurs** | Création, modification et suppression, alertes de permis, statut en service, « Suivre sur la carte », export Excel. L'historique d'un chauffeur liste ses services et le trajet de chacun |
 | **Pointages** | Prises et fins de service (badge ou application), anomalies en rouge, flux des badges en direct, export Excel |
 | **Missions** | Compteurs par statut, liste, détail avec journal d'événements, actions Démarrer, Terminer et Annuler, commentaires, export Excel |
@@ -65,7 +66,7 @@ Après 5 échecs de connexion d'affilée, le compte est verrouillé 15 minutes. 
 | **Visites d'une zone** | Indicateurs (visites, durée moyenne et médiane, temps total, camions distincts), temps par camion, visites en cours en direct, export PDF et Excel |
 | **Rapports** | Kilométrage (jour, semaine, mois), conduite et arrêt, temps chez les clients, visites par zone, activité par chauffeur, activité par camion. Chaque rapport a un graphique, un tableau et un export PDF et Excel |
 | **Paramètres** | Seuils (mouvement, hors ligne, arrêt), état du simulateur (pause et reprise), utilisateurs et rôles, journal d'audit |
-| **Mon service** (chauffeur) | Pointer l'entrée en choisissant un camion, suivi de son camion sur la carte, pointer la sortie, ses derniers services avec leur trajet |
+| **Mon service** (chauffeur) | Pointer l'entrée en choisissant un camion puis une carte GPS, suivi de son camion sur la carte, pointer la sortie, ses derniers services avec leur trajet |
 
 La cloche de la barre du haut reçoit les **notifications en temps réel** : entrées et sorties de zone, survitesse, perte de signal, anomalies de pointage. Tous les écrans s'affichent correctement sur téléphone, sans défilement horizontal.
 
@@ -85,8 +86,12 @@ La cloche de la barre du haut reçoit les **notifications en temps réel** : ent
   - le badge de sortie le clôture et calcule la durée et les km ;
   - anomalies : **prise hors dépôt**, **badge inconnu**, **sortie non pointée** (camion revenu au dépôt et moteur coupé depuis 15 min sans badge de sortie).
 - **Missions** : en attente, puis en cours, puis terminée, ou bien annulée (motif obligatoire). **Un camion ou un chauffeur n'a jamais plus d'une mission en cours** : un verrou en base, posé au démarrage, le garantit.
+- **Cartes GPS** :
+  - une carte est installée sur au plus un camion ; installer une carte sur un camion retire l'ancienne carte de ce camion ;
+  - une carte en service (prise par un chauffeur) ne peut être ni déplacée, ni désactivée, ni supprimée ;
+  - le seuil de survitesse de la carte, s'il est renseigné, remplace la vitesse maximale du camion pour les alertes.
 - **Espace chauffeur** :
-  - le chauffeur pointe depuis son téléphone sur un camion à l'arrêt ;
+  - le chauffeur pointe depuis son téléphone sur un camion à l'arrêt, en choisissant une carte GPS : celle du camion, ou une carte libre qui est alors installée sur le camion ;
   - dès ce moment, le boîtier du camion suit ce chauffeur, et le suivi comme l'historique affichent son nom ;
   - le simulateur continue de faire rouler ce camion, mais ne pointe jamais à la place du chauffeur.
 
@@ -125,7 +130,8 @@ php artisan fleet:check-status          # hors ligne et sorties non pointées (p
 `php artisan migrate:fresh --seed` crée :
 
 - 5 utilisateurs, un par rôle ;
-- 12 camions (de CAM-01 à CAM-24), chacun avec son boîtier GPS. CAM-24 est en maintenance ;
+- 12 camions (de CAM-01 à CAM-24), chacun avec sa carte GPS (GPS-01 à GPS-12). CAM-24 est en maintenance ;
+- 3 cartes de rechange : GPS-13 et GPS-14 libres, GPS-15 désactivée (en réparation) ;
 - 14 chauffeurs avec matricule (CH-1012…) et badge (B-4410…). Un permis expire bientôt, un autre est déjà expiré ;
 - 4 clients et 8 zones : le dépôt Aïn Sebaâ, l'usine de Mohammedia, 4 clients, le chantier de Lissasfa et la zone de livraison du port ;
 - des missions dans les 4 statuts. Les missions du jour sont calées sur l'heure du chargement.
