@@ -87,7 +87,7 @@ const isToday = computed(() => f.date === today)
   </div>
 
   <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-    <section class="card p-5">
+    <section class="card min-w-0 p-5">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap gap-2" role="tablist" aria-label="Filtrer les pointages">
           <button v-for="t in TABS" :key="t.key" type="button" role="tab" :aria-selected="f.tab === t.key"
@@ -98,8 +98,8 @@ const isToday = computed(() => f.date === today)
         </div>
         <div class="flex flex-wrap gap-2">
           <input v-model="f.date" type="date" :max="today" class="input w-auto" aria-label="Date" />
-          <label class="flex h-10 items-center gap-2 rounded-[10px] border border-line bg-page px-3 text-muted">
-            <Search :size="16" /><span class="sr-only">Rechercher</span><input v-model="f.q" type="search" placeholder="Chauffeur, badge, camion…" class="w-44 border-0 bg-transparent text-sm text-ink outline-none" />
+          <label class="order-first flex h-10 min-w-0 basis-full items-center gap-2 rounded-[10px] border border-line bg-page px-3 text-muted sm:order-none sm:basis-auto">
+            <Search :size="16" /><span class="sr-only">Rechercher</span><input v-model="f.q" type="search" placeholder="Chauffeur, badge, camion…" class="w-full min-w-0 border-0 sm:w-44 bg-transparent text-sm text-ink outline-none" />
           </label>
           <button v-if="auth.can('shifts.export')" type="button" class="btn btn-secondary" :disabled="exporting" @click="exportExcel"><Download :size="16" />Exporter Excel</button>
         </div>
@@ -130,7 +130,7 @@ const isToday = computed(() => f.date === today)
       </DataTable>
     </section>
 
-    <div class="flex flex-col gap-5">
+    <div class="flex min-w-0 flex-col gap-5">
       <section class="card p-5">
         <div class="mb-3 flex items-center justify-between">
           <h2 class="m-0 text-base font-bold">Passages de badge en direct</h2>

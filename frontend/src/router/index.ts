@@ -4,13 +4,12 @@ import { useAuthStore } from '@/stores/auth'
 import AppLayout from '@/layouts/AppLayout.vue'
 
 declare module 'vue-router' {
-  interface RouteMeta { title?: string; subtitle?: string; permission?: string; guest?: boolean; step?: number; fullBleed?: boolean }
+  interface RouteMeta { title?: string; subtitle?: string; permission?: string; guest?: boolean; fullBleed?: boolean }
 }
 
-const ComingSoon = () => import('@/views/ComingSoonView.vue')
 
 /** Écrans du menu : titre, sous-titre et étape de livraison. */
-const SCREENS: Record<string, { subtitle: string; step?: number }> = {
+const SCREENS: Record<string, { subtitle: string }> = {
   'driver-portal': { subtitle: 'Pointage et suivi de mon service' },
   dashboard: { subtitle: 'Vue d’ensemble de la flotte' },
   tracking: { subtitle: 'Position des camions en direct' },
@@ -24,8 +23,8 @@ const SCREENS: Record<string, { subtitle: string; step?: number }> = {
   settings: { subtitle: 'Seuils, utilisateurs et simulateur' },
 }
 
-/** Écrans déjà livrés (les autres affichent « bientôt disponible »). */
-const VIEWS: Record<string, { component: RouteRecordRaw['component']; fullBleed?: boolean }> = {
+/** Composant de chaque entrée du menu. */
+const VIEWS: Record<string, { component: NonNullable<RouteRecordRaw['component']>; fullBleed?: boolean }> = {
   tracking: { component: () => import('@/views/TrackingView.vue'), fullBleed: true },
   'driver-portal': { component: () => import('@/views/DriverPortalView.vue') },
   dashboard: { component: () => import('@/views/DashboardView.vue') },
@@ -42,7 +41,7 @@ const VIEWS: Record<string, { component: RouteRecordRaw['component']; fullBleed?
 const appRoutes: RouteRecordRaw[] = NAV.map((item) => ({
   path: item.to.slice(1),
   name: item.name,
-  component: VIEWS[item.name]?.component ?? ComingSoon,
+  component: VIEWS[item.name].component,
   meta: { title: item.label, permission: item.permission, fullBleed: VIEWS[item.name]?.fullBleed, ...SCREENS[item.name] },
 }) as RouteRecordRaw)
 

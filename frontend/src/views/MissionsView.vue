@@ -114,7 +114,7 @@ const evIcon = (t: string) => ({ created: Plus, started: Play, completed: CheckC
   </div>
 
   <div class="grid gap-5" :class="selected || detailLoading ? 'xl:grid-cols-[minmax(0,1fr)_400px]' : ''">
-    <section class="card p-5">
+    <section class="card min-w-0 p-5">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap gap-2" role="tablist" aria-label="Statut">
           <button v-for="t in TABS" :key="t.key" type="button" role="tab" :aria-selected="f.status === t.key" class="inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-semibold"
@@ -122,7 +122,7 @@ const evIcon = (t: string) => ({ created: Plus, started: Play, completed: CheckC
         </div>
         <div class="flex flex-wrap gap-2">
           <input v-model="f.date" type="date" class="input w-auto" aria-label="Date de début prévue" />
-          <label class="flex h-10 items-center gap-2 rounded-[10px] border border-line bg-page px-3 text-muted"><Search :size="16" /><span class="sr-only">Rechercher</span><input v-model="f.q" type="search" placeholder="Référence, camion, chauffeur…" class="w-48 border-0 bg-transparent text-sm text-ink outline-none" /></label>
+          <label class="order-first flex h-10 min-w-0 basis-full items-center gap-2 rounded-[10px] border border-line bg-page px-3 text-muted sm:order-none sm:basis-auto"><Search :size="16" /><span class="sr-only">Rechercher</span><input v-model="f.q" type="search" placeholder="Référence, camion, chauffeur…" class="w-full min-w-0 border-0 bg-transparent text-sm text-ink outline-none sm:w-48" /></label>
           <button v-if="auth.can('missions.export')" type="button" class="btn btn-secondary" @click="exportExcel"><Download :size="16" />Excel</button>
           <button v-if="auth.can('missions.create')" type="button" class="btn btn-primary" @click="openForm(null)"><Plus :size="16" />Nouvelle mission</button>
         </div>
@@ -140,7 +140,7 @@ const evIcon = (t: string) => ({ created: Plus, started: Play, completed: CheckC
     </section>
 
     <!-- Panneau détail -->
-    <aside v-if="selected || detailLoading" class="card flex flex-col gap-4 self-start p-5 xl:sticky xl:top-24" aria-label="Détail de la mission">
+    <aside v-if="selected || detailLoading" class="card flex min-w-0 flex-col gap-4 self-start p-5 xl:sticky xl:top-24" aria-label="Détail de la mission">
       <LoadingState v-if="detailLoading && !selected" />
       <template v-else-if="selected">
         <div class="flex items-start justify-between gap-2">

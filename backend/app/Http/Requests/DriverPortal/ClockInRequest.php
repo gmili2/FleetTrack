@@ -8,7 +8,8 @@ class ClockInRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('driver_portal.use');
+        // Il faut le droit ET un compte lié à une fiche chauffeur (le Super Administrateur a tous les droits mais pas de fiche).
+        return $this->user()->can('driver_portal.use') && $this->user()->driver_id !== null;
     }
 
     public function rules(): array

@@ -79,7 +79,7 @@ const openShift = computed(() => res.value?.data.find((s) => s.open) ?? null)
   </div>
 
   <div class="grid gap-5 2xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-    <section class="card p-5">
+    <section class="card min-w-0 p-5">
       <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
         <h2 class="m-0 text-base font-bold">Historique des services</h2>
         <div class="flex flex-wrap gap-2">
@@ -128,7 +128,7 @@ const openShift = computed(() => res.value?.data.find((s) => s.open) ?? null)
       </div>
     </section>
 
-    <section class="card flex min-h-[480px] flex-col overflow-hidden">
+    <section class="card flex min-h-[480px] min-w-0 flex-col overflow-hidden">
       <div class="border-b border-line px-5 py-3">
         <h2 class="m-0 text-base font-bold">Trajet du service</h2>
         <div v-if="selected" class="flex flex-wrap items-center justify-between gap-2 text-[13px] text-muted">

@@ -19,6 +19,7 @@ if [ "${RUN_MIGRATIONS:-0}" = "1" ]; then
   php artisan migrate --force
   if [ "$(php artisan tinker --execute='echo \App\Models\User::count();' 2>/dev/null | tail -1)" = "0" ]; then
     php artisan db:seed --force
+    php artisan fleet:seed-history --days=30
   fi
   chown -R www-data:www-data storage bootstrap/cache
 fi
