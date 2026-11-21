@@ -17,6 +17,7 @@ class ShiftPresenter
             'source' => $s->source,
             'driver' => $s->driver ? ['id' => $s->driver->id, 'name' => $s->driver->full_name, 'employee_number' => $s->driver->employee_number, 'badge_number' => $s->driver->badge_number] : null,
             'badge_number' => $s->badge_number,
+            'device' => $s->gpsDevice ? ['id' => $s->gpsDevice->id, 'label' => $s->gpsDevice->displayName(), 'imei' => $s->gpsDevice->imei] : null,
             'vehicle' => $s->vehicle ? ['id' => $s->vehicle->id, 'name' => $s->vehicle->name, 'plate_number' => $s->vehicle->plate_number] : null,
             'start_at' => $s->start_at->toIso8601String(),
             'start_place' => $s->start_place,

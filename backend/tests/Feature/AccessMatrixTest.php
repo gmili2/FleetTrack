@@ -23,7 +23,7 @@ use Database\Seeders\DatabaseSeeder;
 /** [méthode, uri, permission requise ou "driver_portal" / "auth"] — les suppressions en dernier. */
 function apiRoutes(array $ids): array
 {
-    ['vehicle' => $v, 'driver' => $d, 'zone' => $z, 'mission' => $m, 'shift' => $s, 'user' => $u, 'own_shift' => $os] = $ids;
+    ['vehicle' => $v, 'driver' => $d, 'zone' => $z, 'mission' => $m, 'shift' => $s, 'user' => $u, 'own_shift' => $os, 'device' => $g] = $ids;
     $period = 'from='.now()->subDays(2)->toDateString().'&to='.now()->toDateString();
 
     return [
@@ -37,6 +37,7 @@ function apiRoutes(array $ids): array
         ['GET', '/api/vehicles/export', 'vehicles.export'],
         ['GET', '/api/drivers', 'drivers.view'], ['GET', "/api/drivers/$d", 'drivers.view'], ['GET', "/api/drivers/$d/shifts", 'drivers.view'],
         ['POST', '/api/drivers', 'drivers.create'], ['PUT', "/api/drivers/$d", 'drivers.update'], ['GET', '/api/drivers/export', 'drivers.export'],
+        ['GET', '/api/gps-devices', 'devices.view'], ['GET', "/api/gps-devices/$g", 'devices.view'], ['POST', '/api/gps-devices', 'devices.create'], ['PUT', "/api/gps-devices/$g", 'devices.update'],
         ['GET', '/api/shifts', 'shifts.view'], ['GET', '/api/badge-events', 'shifts.view'], ['GET', "/api/shifts/$s/track", 'shifts.view'], ['GET', '/api/shifts/export', 'shifts.export'],
         ['GET', '/api/geofences', 'geofences.view'], ['GET', "/api/geofences/$z", 'geofences.view'], ['GET', '/api/customers', 'geofences.view'],
         ['GET', "/api/geofences/$z/visits", 'geofences.view'], ['GET', "/api/geofences/$z/visits/export?format=xlsx", 'geofences.export'],
@@ -47,11 +48,11 @@ function apiRoutes(array $ids): array
         ['GET', '/api/settings', 'settings.view'], ['GET', '/api/audit-logs', 'settings.view'], ['PUT', '/api/settings/thresholds', 'settings.update'],
         ['POST', '/api/settings/simulator', 'simulator.manage'],
         ['GET', '/api/users', 'users.view'], ['POST', '/api/users', 'users.create'], ['PUT', "/api/users/$u", 'users.update'], ['POST', "/api/users/$u/unlock", 'users.update'],
-        ['GET', '/api/me/driver', 'driver_portal'], ['GET', '/api/me/driver/vehicles', 'driver_portal'], ['GET', "/api/me/driver/shifts/$os/track", 'driver_portal'],
+        ['GET', '/api/me/driver', 'driver_portal'], ['GET', '/api/me/driver/vehicles', 'driver_portal'], ['GET', '/api/me/driver/devices', 'driver_portal'], ['GET', "/api/me/driver/shifts/$os/track", 'driver_portal'],
         ['POST', '/api/me/driver/clock-in', 'driver_portal'], ['POST', '/api/me/driver/clock-out', 'driver_portal'],
         // Suppressions (en dernier)
         ['DELETE', "/api/missions/$m", 'missions.delete'], ['DELETE', "/api/geofences/$z", 'geofences.delete'],
-        ['DELETE', "/api/drivers/$d", 'drivers.delete'], ['DELETE', "/api/vehicles/$v", 'vehicles.delete'], ['DELETE', "/api/users/$u", 'users.delete'],
+        ['DELETE', "/api/gps-devices/$g", 'devices.delete'], ['DELETE', "/api/drivers/$d", 'drivers.delete'], ['DELETE', "/api/vehicles/$v", 'vehicles.delete'], ['DELETE', "/api/users/$u", 'users.delete'],
     ];
 }
 
@@ -70,6 +71,7 @@ it('applique les droits du rôle sur toutes les routes de l’API', function (st
         'shift' => DriverShift::create(['driver_id' => Driver::first()->id, 'vehicle_id' => Vehicle::first()->id, 'start_at' => now()->subHours(2), 'end_at' => now()->subHour()])->id,
         'own_shift' => DriverShift::create(['driver_id' => $driverUser->driver_id, 'vehicle_id' => Vehicle::first()->id, 'start_at' => now()->subHours(5), 'end_at' => now()->subHours(4)])->id,
         'user' => User::where('email', 'operateur@demo.ma')->value('id'),
+        'device' => \App\Models\GpsDevice::where('label', 'GPS-14')->value('id'),   // carte de rechange
     ];
     $this->actingAs($actor);
     $failures = [];
@@ -102,7 +104,7 @@ it('applique les droits du rôle sur toutes les routes de l’API', function (st
 
 it('refuse toute route protégée sans connexion', function () {
     $this->seed(DatabaseSeeder::class);
-    $ids = ['vehicle' => 1, 'driver' => 1, 'zone' => 1, 'mission' => 1, 'shift' => 1, 'user' => 1, 'own_shift' => 1];
+    $ids = ['vehicle' => 1, 'driver' => 1, 'zone' => 1, 'mission' => 1, 'shift' => 1, 'user' => 1, 'own_shift' => 1, 'device' => 1];
     foreach (apiRoutes($ids) as [$method, $uri]) {
         expect($this->json($method, $uri)->getStatusCode())->toBe(401, "$method $uri");
     }

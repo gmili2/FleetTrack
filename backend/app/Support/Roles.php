@@ -32,6 +32,8 @@ final class Roles
         'history' => ['view'],
         'vehicles' => ['view', 'create', 'update', 'delete', 'export'],
         'drivers' => ['view', 'create', 'update', 'delete', 'export'],
+        // Cartes GPS (boîtiers) et leur configuration.
+        'devices' => ['view', 'create', 'update', 'delete'],
         'shifts' => ['view', 'export'],
         'missions' => ['view', 'create', 'update', 'operate', 'delete', 'export'],
         'geofences' => ['view', 'create', 'update', 'delete', 'export'],

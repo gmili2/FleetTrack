@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\DriverPortalController;
+use App\Http\Controllers\Api\GpsDeviceController;
 use App\Http\Controllers\Api\LiveController;
 use App\Http\Controllers\Api\NotificationController;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('can:driver_portal.use')->prefix('me/driver')->group(function () {
         Route::get('/', [DriverPortalController::class, 'show']);
         Route::get('/vehicles', [DriverPortalController::class, 'vehicles']);
+        Route::get('/devices', [DriverPortalController::class, 'devices']);
         Route::post('/clock-in', [DriverPortalController::class, 'clockIn'])->middleware('throttle:10,1');
         Route::post('/clock-out', [DriverPortalController::class, 'clockOut'])->middleware('throttle:10,1');
         Route::get('/shifts/{shift}/track', [DriverPortalController::class, 'track']);
@@ -72,6 +74,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('drivers', DriverController::class);
     Route::get('/drivers/{driver}/shifts', [DriverController::class, 'shifts'])->middleware('can:drivers.view');
     Route::get('/shifts/{shift}/track', [DriverController::class, 'track'])->middleware('can:shifts.view');
+
+    // Cartes GPS et leur configuration (GpsDevicePolicy)
+    Route::apiResource('gps-devices', GpsDeviceController::class);
 
     // Pointages
     Route::get('/shifts', [ShiftController::class, 'index']);

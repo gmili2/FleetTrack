@@ -12,9 +12,10 @@ use App\Models\Position;
 use App\Models\Vehicle;
 use App\Models\VehicleAssignment;
 use App\Models\VehicleLiveStatus;
+use App\Support\GpsConfig;
 use Illuminate\Database\Seeder;
 
-/** 12 camions, 12 boîtiers GPS, affectations et position de départ au dépôt. */
+/** 12 camions, 12 cartes GPS installées + 3 cartes de rechange, affectations et position de départ au dépôt. */
 class VehicleSeeder extends Seeder
 {
     public const VEHICLES = [
@@ -55,8 +56,11 @@ class VehicleSeeder extends Seeder
             ]);
 
             GpsDevice::updateOrCreate(['imei' => sprintf('86%013d', 4471 + 1117 * $i)], [
+                'label' => sprintf('GPS-%02d', $i + 1),
                 'model' => $i % 3 === 0 ? 'Teltonika FMC130' : 'Teltonika FMB920',
                 'sim_number' => sprintf('+212 7 00 10 %02d %02d', $i + 10, 30 + $i),
+                'operator' => ['maroc_telecom', 'orange', 'inwi'][$i % 3],
+                'config' => GpsConfig::merge(['apn' => ['iam', 'internet.orange.ma', 'www.inwi.ma'][$i % 3]]),
                 'vehicle_id' => $vehicle->id,
                 'is_active' => true,
                 'installed_at' => $now->copy()->subMonths(10 + $i),
@@ -82,6 +86,22 @@ class VehicleSeeder extends Seeder
                 'geofence_id' => $depot->id,
                 'today_distance_km' => 0,
                 'last_position_at' => $at,
+            ]);
+        }
+
+        // Cartes de rechange (non installées) : le chauffeur peut en choisir une au pointage.
+        foreach ([13 => true, 14 => true, 15 => false] as $n => $active) {
+            GpsDevice::updateOrCreate(['imei' => sprintf('86%013d', 900000 + $n)], [
+                'label' => sprintf('GPS-%02d', $n),
+                'model' => $n === 15 ? 'Concox GT06N' : 'Teltonika FMB920',
+                'sim_number' => sprintf('+212 7 00 20 %02d 00', $n),
+                'operator' => $n === 14 ? 'inwi' : 'maroc_telecom',
+                'vehicle_id' => null,
+                'is_active' => $active,
+                'config' => GpsConfig::merge($n === 15
+                    ? ['protocol' => 'gt06', 'server_port' => 5023, 'interval_moving_s' => 20, 'apn' => 'iam']
+                    : ['apn' => $n === 14 ? 'www.inwi.ma' : 'iam']),
+                'notes' => $active ? 'Carte de rechange' : 'En réparation',
             ]);
         }
     }

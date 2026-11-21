@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class DriverShift extends Model
 {
     protected $fillable = [
-        'driver_id', 'vehicle_id', 'badge_number', 'source',
+        'driver_id', 'vehicle_id', 'gps_device_id', 'badge_number', 'source',
         'start_at', 'start_lat', 'start_lng', 'start_place',
         'end_at', 'end_lat', 'end_lng', 'end_place',
         'duration_seconds', 'distance_km', 'anomaly',
@@ -39,6 +39,11 @@ class DriverShift extends Model
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class)->withTrashed();
+    }
+
+    public function gpsDevice(): BelongsTo
+    {
+        return $this->belongsTo(GpsDevice::class);
     }
 
     public function badgeEvents(): HasMany

@@ -78,7 +78,7 @@ class ShiftController extends Controller
         [$from, $to] = [$day->startOfDay()->utc(), $day->endOfDay()->utc()];
         $isToday = $day->isSameDay(now(self::TZ));
 
-        return DriverShift::with('driver', 'vehicle')
+        return DriverShift::with('driver', 'vehicle', 'gpsDevice')
             ->where(fn ($q) => $q->whereBetween('start_at', [$from, $to])->when($isToday, fn ($q) => $q->orWhereNull('end_at')));
     }
 

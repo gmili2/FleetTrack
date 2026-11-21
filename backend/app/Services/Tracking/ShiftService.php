@@ -11,6 +11,7 @@ use App\Events\FleetActivity;
 use App\Models\BadgeEvent;
 use App\Models\Driver;
 use App\Models\DriverShift;
+use App\Models\GpsDevice;
 use App\Models\GpsEvent;
 use App\Models\Position;
 use App\Models\Vehicle;
@@ -53,7 +54,8 @@ class ShiftService
         };
 
         $shift = DriverShift::create([
-            'driver_id' => $driver?->id, 'vehicle_id' => $vehicle->id, 'badge_number' => $badge, 'source' => $source,
+            'driver_id' => $driver?->id, 'vehicle_id' => $vehicle->id, 'gps_device_id' => GpsDevice::where('vehicle_id', $vehicle->id)->value('id'),
+            'badge_number' => $badge, 'source' => $source,
             'start_at' => $at, 'start_lat' => $lat, 'start_lng' => $lng, 'start_place' => $place, 'anomaly' => $anomaly,
         ]);
         BadgeEvent::create([

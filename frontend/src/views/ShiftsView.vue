@@ -114,7 +114,7 @@ const isToday = computed(() => f.date === today)
               <Smartphone v-if="row.source === 'app'" :size="12" aria-label="pointé depuis l’application" /></span>
           </div>
         </template>
-        <template #cell-vehicle="{ row }"><b class="block">{{ row.vehicle?.name }}</b><span class="text-xs text-muted">{{ row.vehicle?.plate_number }}</span></template>
+        <template #cell-vehicle="{ row }"><b class="block">{{ row.vehicle?.name }}</b><span class="text-xs text-muted">{{ row.vehicle?.plate_number }}<template v-if="row.device"> · {{ row.device.label }}</template></span></template>
         <template #cell-state="{ row }">
           <StatusBadge v-if="row.anomaly" tone="red" :label="row.anomaly_label ?? ''" :icon="TriangleAlert" />
           <StatusBadge v-else-if="row.open" tone="blue" label="En service" :icon="BadgeCheck" />

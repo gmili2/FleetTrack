@@ -36,6 +36,7 @@ export type ShiftRow = {
   driver: { id: number; name: string; employee_number: string; badge_number: string } | null
   badge_number: string | null
   vehicle: { id: number; name: string; plate_number: string } | null
+  device: { id: number; label: string; imei: string } | null
   start_at: string; start_place: string | null; end_at: string | null; end_place: string | null
   open: boolean; duration_seconds: number; distance_km: number | null; anomaly: string | null; anomaly_label: string | null
 }
@@ -81,4 +82,19 @@ export type MissionRow = {
   cargo: string | null; notes: string | null; cancel_reason: string | null; distance_km: number | null; created_by: string | null
   events?: { id: number; type: string; label: string; message: string; author: string | null; automatic: boolean; occurred_at: string }[]
   can: { update: boolean; operate: boolean; delete: boolean }
+}
+
+export type GpsConfig = {
+  protocol: string; server_host: string; server_port: number; apn: string | null
+  interval_moving_s: number; interval_stopped_s: number; angle_change_deg: number; distance_m: number
+  overspeed_kmh: number | null; ignition_detection: boolean; harsh_driving: boolean
+}
+
+export type GpsDeviceRow = {
+  id: number; label: string | null; name: string; imei: string; model: string | null; sim_number: string | null
+  operator: string | null; operator_label: string | null; is_active: boolean; notes: string | null
+  vehicle: { id: number; name: string; plate_number: string } | null
+  installed_at: string | null; last_seen_at: string | null; online: boolean
+  in_service: { shift_id: number; driver: string | null; start_at: string } | null
+  config: GpsConfig; protocol_label: string | null
 }

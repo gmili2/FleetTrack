@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import { BarChart3, CircleUserRound, ClipboardList, Hexagon, History, IdCard, LayoutDashboard, MapPin, SlidersHorizontal, Truck, Users } from 'lucide-vue-next'
+import { BarChart3, CircleUserRound, ClipboardList, Cpu, Hexagon, History, IdCard, LayoutDashboard, MapPin, SlidersHorizontal, Truck, Users } from 'lucide-vue-next'
 
 export type NavItem = { name: string; label: string; to: string; icon: Component; permission: string; driverOnly?: boolean }
 
@@ -10,6 +10,7 @@ export const NAV: NavItem[] = [
   { name: 'tracking', label: 'Suivi temps réel', to: '/suivi', icon: MapPin, permission: 'tracking.view' },
   { name: 'history', label: 'Historique', to: '/historique', icon: History, permission: 'history.view' },
   { name: 'vehicles', label: 'Camions', to: '/camions', icon: Truck, permission: 'vehicles.view' },
+  { name: 'devices', label: 'Cartes GPS', to: '/cartes-gps', icon: Cpu, permission: 'devices.view' },
   { name: 'drivers', label: 'Chauffeurs', to: '/chauffeurs', icon: Users, permission: 'drivers.view' },
   { name: 'shifts', label: 'Pointages', to: '/pointages', icon: IdCard, permission: 'shifts.view' },
   { name: 'missions', label: 'Missions', to: '/missions', icon: ClipboardList, permission: 'missions.view' },

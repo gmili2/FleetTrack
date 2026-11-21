@@ -15,6 +15,7 @@ const SCREENS: Record<string, { subtitle: string }> = {
   tracking: { subtitle: 'Position des camions en direct' },
   history: { subtitle: 'Trajets et GPS Replay' },
   vehicles: { subtitle: 'Parc de camions et boîtiers GPS' },
+  devices: { subtitle: 'Boîtiers, cartes SIM et configuration de chaque carte' },
   drivers: { subtitle: 'Matricules, badges, permis et historique' },
   shifts: { subtitle: 'Prises et fins de service par badge' },
   missions: { subtitle: 'Planification et suivi des missions' },
@@ -36,6 +37,7 @@ const VIEWS: Record<string, { component: NonNullable<RouteRecordRaw['component']
   reports: { component: () => import('@/views/ReportsView.vue') },
   settings: { component: () => import('@/views/SettingsView.vue') },
   drivers: { component: () => import('@/views/DriversView.vue') },
+  devices: { component: () => import('@/views/GpsDevicesView.vue') },
 }
 
 const appRoutes: RouteRecordRaw[] = NAV.map((item) => ({

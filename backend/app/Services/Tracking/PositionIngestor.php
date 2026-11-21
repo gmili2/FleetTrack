@@ -6,6 +6,7 @@ use App\Enums\GpsEventType;
 use App\Enums\LiveStatus;
 use App\Events\FleetActivity;
 use App\Events\PositionUpdated;
+use App\Models\GpsDevice;
 use App\Models\GpsEvent;
 use App\Models\Position;
 use App\Models\Setting;
@@ -72,11 +73,16 @@ class PositionIngestor
         if ($prevAt !== null && $ignition !== $prevIgnition) {
             $this->event($ignition ? GpsEventType::IgnitionOn : GpsEventType::IgnitionOff, $vehicle, $at);
         }
-        if ($speed > $vehicle->speed_limit_kmh) {
-            $this->overspeed($vehicle, $speed, $lat, $lng, $at, $broadcast);
+        // Carte actuellement installée (elle peut changer au pointage : pas de relation gardée en mémoire).
+        $device = GpsDevice::where('vehicle_id', $vehicle->id)->first();
+        $vehicle->setRelation('device', $device);
+        // Seuil de survitesse : celui de la carte s'il est configuré, sinon la vitesse max du camion.
+        $limit = $device?->configuration()['overspeed_kmh'] ?? $vehicle->speed_limit_kmh;
+        if ($speed > $limit) {
+            $this->overspeed($vehicle, $speed, $limit, $lat, $lng, $at, $broadcast);
         }
 
-        $vehicle->device?->forceFill(['last_seen_at' => $at])->saveQuietly();
+        $device?->forceFill(['last_seen_at' => $at])->saveQuietly();
 
         if ($broadcast) {
             Realtime::send(new PositionUpdated(LivePayload::make($vehicle)));
@@ -85,15 +91,15 @@ class PositionIngestor
         return $live;
     }
 
-    private function overspeed(Vehicle $vehicle, float $speed, float $lat, float $lng, CarbonInterface $at, bool $broadcast): void
+    private function overspeed(Vehicle $vehicle, float $speed, int $limit, float $lat, float $lng, CarbonInterface $at, bool $broadcast): void
     {
         // Une alerte au plus toutes les 10 minutes par camion.
         if (! Cache::add("overspeed:{$vehicle->id}", 1, self::OVERSPEED_COOLDOWN_S)) {
             return;
         }
-        $this->event(GpsEventType::Overspeed, $vehicle, $at, ['speed_kmh' => $speed, 'limit_kmh' => $vehicle->speed_limit_kmh, 'lat' => $lat, 'lng' => $lng]);
+        $this->event(GpsEventType::Overspeed, $vehicle, $at, ['speed_kmh' => $speed, 'limit_kmh' => $limit, 'lat' => $lat, 'lng' => $lng]);
         if ($broadcast) {
-            $msg = sprintf('%s roule à %d km/h (limite %d km/h).', $vehicle->name, $speed, $vehicle->speed_limit_kmh);
+            $msg = sprintf('%s roule à %d km/h (limite %d km/h).', $vehicle->name, $speed, $limit);
             Realtime::send(new FleetActivity('overspeed', $msg, $vehicle->id, ['speed_kmh' => $speed], $at->toIso8601String()));
             $this->alerts->send(new FleetAlert('overspeed', 'Excès de vitesse', $msg, 'warning', $vehicle->id, "/suivi?v={$vehicle->id}"));
         }

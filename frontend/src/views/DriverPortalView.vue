@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import L from 'leaflet'
-import { BadgeCheck, ChevronRight, Clock, LogIn, LogOut, MapPin, Route, TriangleAlert, Truck, X } from 'lucide-vue-next'
+import { BadgeCheck, ChevronRight, Clock, Cpu, LogIn, LogOut, MapPin, Route, TriangleAlert, Truck, X } from 'lucide-vue-next'
 import { errorMessage, http } from '@/lib/http'
 import { fDate, fDuration, fKm, fTime } from '@/lib/format'
 import { ago } from '@/lib/time'
@@ -22,6 +22,7 @@ type Portal = {
   recent: ShiftRow[]
 }
 type PickVehicle = LiveVehicle & { available: boolean; unavailable_reason: string | null; at_depot: boolean }
+type PickDevice = { id: number; name: string; imei: string; model: string | null; vehicle_id: number | null; vehicle_name: string | null }
 
 const data = ref<Portal | null>(null)
 const error = ref('')
@@ -44,16 +45,29 @@ const picking = ref(false)
 const vehicles = ref<PickVehicle[]>([])
 const vehiclesLoading = ref(false)
 const chosen = ref<PickVehicle | null>(null)
+const devices = ref<PickDevice[]>([])
+const chosenDevice = ref<PickDevice | null>(null)
+/** Cartes proposées pour le camion choisi : la sienne d'abord, puis les cartes libres. */
+const deviceChoices = computed(() => chosen.value
+  ? [...devices.value.filter((d) => d.vehicle_id === chosen.value!.id), ...devices.value.filter((d) => d.vehicle_id === null)]
+  : [])
+watch(chosen, () => { chosenDevice.value = deviceChoices.value[0] ?? null })
 const busy = ref(false)
 const actionError = ref('')
 
 async function openPicker() {
   picking.value = true
   chosen.value = null
+  chosenDevice.value = null
   actionError.value = ''
   vehiclesLoading.value = true
   try {
-    vehicles.value = (await http.get<{ data: PickVehicle[] }>('/api/me/driver/vehicles')).data.data
+    const [v, d] = await Promise.all([
+      http.get<{ data: PickVehicle[] }>('/api/me/driver/vehicles'),
+      http.get<{ data: PickDevice[] }>('/api/me/driver/devices'),
+    ])
+    vehicles.value = v.data.data
+    devices.value = d.data.data
   } catch (e) {
     actionError.value = errorMessage(e)
   } finally {
@@ -62,11 +76,11 @@ async function openPicker() {
 }
 
 async function clockIn() {
-  if (!chosen.value) return
+  if (!chosen.value || !chosenDevice.value) return
   busy.value = true
   actionError.value = ''
   try {
-    const { data: r } = await http.post<{ message: string }>('/api/me/driver/clock-in', { vehicle_id: chosen.value.id })
+    const { data: r } = await http.post<{ message: string }>('/api/me/driver/clock-in', { vehicle_id: chosen.value.id, gps_device_id: chosenDevice.value.id })
     flash.value = r.message
     picking.value = false
     await load()
@@ -167,7 +181,7 @@ onBeforeUnmount(() => { if (poll) clearInterval(poll); if (tick) clearInterval(t
         <div class="flex size-14 items-center justify-center rounded-full bg-page text-offline"><Clock :size="26" /></div>
         <div>
           <div class="text-lg font-bold">Vous n’êtes pas en service</div>
-          <p class="m-0 mt-1 text-sm text-muted">Pointez l’entrée et choisissez votre camion : sa carte GPS suivra votre service.</p>
+          <p class="m-0 mt-1 text-sm text-muted">Pointez l’entrée en choisissant votre camion et votre carte GPS : la carte suivra votre service.</p>
         </div>
         <button type="button" class="btn btn-primary h-14 w-full max-w-sm text-base" @click="openPicker"><LogIn :size="20" />Pointer l’entrée</button>
       </section>
@@ -186,7 +200,7 @@ onBeforeUnmount(() => { if (poll) clearInterval(poll); if (tick) clearInterval(t
             <Truck :size="22" class="text-brand" />
             <div class="min-w-0 flex-1">
               <div class="font-bold">{{ data.shift.vehicle?.name }} <span class="font-medium text-muted">· {{ data.shift.vehicle?.plate_number }}</span></div>
-              <div class="text-[13px] text-muted">{{ data.vehicle?.brand }} {{ data.vehicle?.model }} · boîtier {{ data.vehicle?.device?.model }}</div>
+              <div class="text-[13px] text-muted">{{ data.vehicle?.brand }} {{ data.vehicle?.model }} · carte {{ data.shift.device?.label ?? data.vehicle?.device?.model }}</div>
             </div>
             <StatusBadge v-if="data.vehicle" :status="data.vehicle.status" />
           </div>
@@ -227,7 +241,7 @@ onBeforeUnmount(() => { if (poll) clearInterval(poll); if (tick) clearInterval(t
       <div v-if="picking" class="fixed inset-0 z-[1000] flex items-end justify-center bg-ink/50 sm:items-center sm:p-4" @click.self="picking = false">
         <div class="flex max-h-[90dvh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-xl sm:rounded-2xl" role="dialog" aria-modal="true" aria-labelledby="pick-title">
           <div class="flex items-center justify-between border-b border-line px-5 py-4">
-            <h2 id="pick-title" class="m-0 text-lg font-bold">Quel camion prenez-vous ?</h2>
+            <h2 id="pick-title" class="m-0 text-lg font-bold">{{ chosen ? 'Quelle carte GPS ?' : 'Quel camion prenez-vous ?' }}</h2>
             <button type="button" class="btn-icon" aria-label="Fermer" @click="picking = false"><X :size="18" /></button>
           </div>
           <div class="flex-1 overflow-y-auto px-5 py-3">
@@ -247,6 +261,26 @@ onBeforeUnmount(() => { if (poll) clearInterval(poll); if (tick) clearInterval(t
                 </button>
               </li>
             </ul>
+            <div v-if="chosen && !vehiclesLoading" class="mt-4 border-t border-line pt-4">
+              <h3 class="m-0 mb-2 text-sm font-bold">Carte GPS pour {{ chosen.name }}</h3>
+              <p v-if="!deviceChoices.length" class="m-0 text-sm text-danger">Aucune carte disponible pour ce camion. Contactez le responsable de flotte.</p>
+              <ul v-else class="m-0 flex list-none flex-col gap-2 p-0">
+                <li v-for="d in deviceChoices" :key="d.id">
+                  <button type="button" :aria-pressed="chosenDevice?.id === d.id"
+                    class="flex w-full items-center gap-3 rounded-xl border p-3 text-left"
+                    :class="chosenDevice?.id === d.id ? 'border-brand bg-[#EFF6FF]' : 'border-line hover:bg-page'" @click="chosenDevice = d">
+                    <Cpu :size="20" class="flex-none text-brand" />
+                    <div class="min-w-0 flex-1">
+                      <div class="font-bold">{{ d.name }} <span class="text-[13px] font-medium text-muted">· {{ d.model ?? 'boîtier' }}</span></div>
+                      <div class="truncate font-mono text-[12px] text-muted">IMEI {{ d.imei }}</div>
+                    </div>
+                    <StatusBadge v-if="d.vehicle_id" tone="blue" label="Installée" />
+                    <StatusBadge v-else tone="orange" label="Libre" />
+                  </button>
+                </li>
+              </ul>
+              <p v-if="chosenDevice && !chosenDevice.vehicle_id" class="m-0 mt-2 text-[13px] text-muted">La carte {{ chosenDevice.name }} sera installée sur {{ chosen.name }} et remplacera sa carte actuelle.</p>
+            </div>
           </div>
           <div class="flex flex-col gap-2 border-t border-line px-5 py-4">
             <p v-if="chosen" class="m-0 text-[13px] text-muted">
@@ -254,7 +288,7 @@ onBeforeUnmount(() => { if (poll) clearInterval(poll); if (tick) clearInterval(t
               <span v-if="!chosen.at_depot" class="text-[#9A3412]">Prise hors dépôt : elle sera signalée.</span>
             </p>
             <div v-if="actionError" class="text-sm text-danger" role="alert">{{ actionError }}</div>
-            <button type="button" class="btn btn-primary h-12" :disabled="!chosen || busy" @click="clockIn"><LogIn :size="18" />{{ busy ? 'Pointage…' : chosen ? `Pointer l’entrée sur ${chosen.name}` : 'Choisissez un camion' }}</button>
+            <button type="button" class="btn btn-primary h-12" :disabled="!chosen || !chosenDevice || busy" @click="clockIn"><LogIn :size="18" />{{ busy ? 'Pointage…' : !chosen ? 'Choisissez un camion' : !chosenDevice ? 'Choisissez une carte GPS' : `Pointer l’entrée : ${chosen.name} + ${chosenDevice.name}` }}</button>
           </div>
         </div>
       </div>

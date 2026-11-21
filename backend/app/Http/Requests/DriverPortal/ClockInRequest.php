@@ -14,11 +14,11 @@ class ClockInRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['vehicle_id' => ['required', 'integer', 'exists:vehicles,id']];
+        return ['vehicle_id' => ['required', 'integer', 'exists:vehicles,id'], 'gps_device_id' => ['required', 'integer', 'exists:gps_devices,id']];
     }
 
     public function attributes(): array
     {
-        return ['vehicle_id' => 'camion'];
+        return ['vehicle_id' => 'camion', 'gps_device_id' => 'carte GPS'];
     }
 }

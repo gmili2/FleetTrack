@@ -130,7 +130,7 @@ class DriverController extends Controller
     public function shifts(Request $request, Driver $driver): JsonResponse
     {
         $request->validate(['from' => ['nullable', 'date'], 'to' => ['nullable', 'date', 'after_or_equal:from']]);
-        $page = $driver->shifts()->with('vehicle', 'driver')
+        $page = $driver->shifts()->with('vehicle', 'driver', 'gpsDevice')
             ->when($request->date('from'), fn ($q, $d) => $q->where('start_at', '>=', $d->copy()->shiftTimezone('Africa/Casablanca')->startOfDay()->utc()))
             ->when($request->date('to'), fn ($q, $d) => $q->where('start_at', '<=', $d->copy()->shiftTimezone('Africa/Casablanca')->endOfDay()->utc()))
             ->latest('start_at')->paginate(15);
@@ -154,6 +154,6 @@ class DriverController extends Controller
 
     public function track(DriverShift $shift, TripAnalyzer $analyzer): JsonResponse
     {
-        return response()->json(['data' => ShiftPresenter::track($shift->load('vehicle', 'driver'), $analyzer)]);
+        return response()->json(['data' => ShiftPresenter::track($shift->load('vehicle', 'driver', 'gpsDevice'), $analyzer)]);
     }
 }
